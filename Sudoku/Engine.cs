@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Diagnostics;
 
 namespace Sudoku
 {
@@ -8,25 +6,58 @@ namespace Sudoku
     {
         public int[] Solve(int[] puzzle)
         {
-            HashSet<int>[] candidates = CreateCandidates(puzzle);
+            using Board board = new();
             
+            board.LoadPuzzle(puzzle);
+            PrintCandidates(board, "Initial setup");
             
+            // the cells are bound to one another when the board ic created
+            // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
+            // this does the majority of the work, but it does not solve every puzzle
             
-            return GetSolution(candidates);
+            int pass = 0;
+            while (board.IsUnsolved)
+            {
+                pass++;
+                bool boardChanged = false;
+                
+                // we are using the logical or operators below to only run methods until the board changes, then skip the others
+                
+                // check for solved cells
+                // this is obsolete -> the bound cells already notify each other when they are solved
+                // boardChanged = boardChanged || board.CheckForSolvedCells();
+                
+                // check for cells with the only value for a row/col/grid
+                // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
+                boardChanged = boardChanged || board.CheckForLoneCandidates();
+                
+                // check for deadlocks
+                boardChanged = boardChanged || board.CheckForDeadlockedCells();
+
+                PrintCandidates(board, $"pass #{pass}");
+                if (!boardChanged) break;
+            }
+
+            if (board.IsUnsolved)
+            {
+                Debug.WriteLine("Unable to find solution!");
+            }
+            else
+            {
+                Debug.WriteLine("Solution found!");
+            }
+            
+            return board.GetSolution();
         }
 
-        private HashSet<int>[] CreateCandidates(int[] puzzle)
+        private static void PrintCandidates(Board board, string message)
         {
-            return Enumerable.Range(0, 81)
-                .Select(i => puzzle[i] == 0 ? Enumerable.Range(1, 9).ToHashSet() : new() { puzzle[i] })
-                .ToArray();
-        }
-
-        private int[] GetSolution(HashSet<int>[] candidates)
-        {
-            return candidates
-                .Select(hs => hs.Count == 1 ? hs.First() : 0)
-                .ToArray();
+            Debug.WriteLine(string.Empty);
+            Debug.WriteLine(new string('*', 40));
+            Debug.WriteLine(message);
+            Debug.WriteLine(board.CandidatesListing());
+            Debug.WriteLine(new string('*', 40));
+            Debug.WriteLine(string.Empty);
         }
     }
 }

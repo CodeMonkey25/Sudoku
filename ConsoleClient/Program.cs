@@ -8,7 +8,20 @@ namespace ConsoleClient
     {
         static void Main(string[] args)
         {
-            int[] puzzle = LoadPuzzle("4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7");
+            string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
+            // string puzzleText = @"
+            //     530 070 000
+            //     600 195 000
+            //     098 000 060
+            //     800 060 003
+            //     400 803 001
+            //     700 020 006
+            //     060 000 280
+            //     000 419 005
+            //     000 080 079
+            // ";
+            
+            int[] puzzle = LoadPuzzle(puzzleText);
             PrintPuzzle(puzzle);
             Console.WriteLine();
             
@@ -17,12 +30,22 @@ namespace ConsoleClient
             Action action = () => solution = engine.Solve(puzzle);
             Console.WriteLine(Utility.TimeIt(action));
             PrintPuzzle(solution);
+
+            Console.WriteLine($"they match: {puzzle.Zip(solution, (i, j) => i == j).Aggregate((b1, b2) => b1 && b2)}");
         }
         
         private static int[] LoadPuzzle(string puzzle)
         {
+            // assume comma seperated format (4,,,,9,,,8 ...)
             string[] strings = puzzle.Split(',');
-            if (strings.Length != 81) throw new Exception("Puzzle is malformed: cell count is not 81");
+            if (strings.Length != 81)
+            {
+                // check for alternate format (530 070 000 ...)
+                strings = puzzle.Where(char.IsDigit).Select(c => c.ToString()).ToArray();
+                    
+                if (strings.Length != 81)
+                    throw new Exception("Puzzle is malformed: cell count is not 81");
+            }
             if (strings.Any(s => s.Length > 1)) throw new Exception("Puzzle is malformed: all cell lengths are not <= 0");
 
             char[] chars = strings.Select(s => s == string.Empty ? '0' : s.First()).ToArray();
