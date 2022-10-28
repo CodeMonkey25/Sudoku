@@ -22,16 +22,14 @@ namespace ConsoleClient
             // ";
             
             int[] puzzle = LoadPuzzle(puzzleText);
-            PrintPuzzle(puzzle);
-            Console.WriteLine();
+            // PrintPuzzle(puzzle);
+            // Console.WriteLine();
             
             Engine engine = new();
             int[] solution = new int[81];
-            Action action = () => solution = engine.Solve(puzzle);
-            Console.WriteLine(Utility.TimeIt(action));
+            string timing = Utility.TimeIt(() => solution = engine.Solve(puzzle));
             PrintPuzzle(solution);
-
-            Console.WriteLine($"they match: {puzzle.Zip(solution, (i, j) => i == j).Aggregate((b1, b2) => b1 && b2)}");
+            Console.WriteLine(timing);
         }
         
         private static int[] LoadPuzzle(string puzzle)
