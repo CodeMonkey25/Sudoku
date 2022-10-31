@@ -7,9 +7,12 @@ namespace ConsoleClient
 {
     internal static class Program
     {
+        private static readonly string RowDivider = new('-', 19);
+        
         private static void Main()
         {
-            string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
+            string puzzleText =
+                "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
             // string puzzleText = @"
             //     530 070 000
             //     600 195 000
@@ -21,40 +24,39 @@ namespace ConsoleClient
             //     000 419 005
             //     000 080 079
             // ";
-            
+
             int[] puzzle = LoadPuzzle(puzzleText);
             // PrintPuzzle(puzzle);
             // Console.WriteLine();
-            
+
             int[] solution = Array.Empty<int>();
             string timing = Utility.TimeIt(() => solution = Engine.Solve(puzzle));
             PrintPuzzle(solution);
 
             Console.WriteLine(timing);
         }
-        
+
 
         private static void PrintPuzzle(int[] puzzle)
         {
-            string divider = new('-', 19);
-
-            Console.WriteLine(divider);
+            Console.WriteLine(RowDivider);
             int cell = 1;
-            foreach (char c in puzzle.Select(i => '0' + i))
+            foreach (int i in puzzle)
             {
+                char c = (char)('0' + i);
                 Console.Write('|');
                 Console.Write(c == '0' ? ' ' : c);
-                
+
                 if (cell % 9 == 0)
                 {
                     Console.WriteLine('|');
-                    Console.WriteLine(divider);
+                    Console.WriteLine(RowDivider);
                 }
 
                 ++cell;
             }
         }
-        
+
         private static int[] LoadPuzzle(string puzzle)
         {
             int[] loadedPuzzle = Array.Empty<int>();
@@ -70,10 +72,10 @@ namespace ConsoleClient
 
             if (loadedPuzzle.Length != 81)
                 throw new Exception("Puzzle is malformed: cell count is not 81");
-            
+
             return loadedPuzzle;
         }
-        
+
         private static int[] LoadPuzzleWithCommas(string puzzle)
         {
             // comma seperated format (4,,,,9,,,8 ...)
@@ -83,7 +85,7 @@ namespace ConsoleClient
             foreach (char c in puzzle)
             {
                 if (i >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
-            
+
                 switch (c)
                 {
                     case ',':
@@ -103,7 +105,7 @@ namespace ConsoleClient
                         break;
                 }
             }
-            
+
             return loadedPuzzle;
         }
 

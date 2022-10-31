@@ -31,13 +31,8 @@ namespace Sudoku
             foreach (Cell cell in cells)
             {
                 if (cell == this) continue;
-                BindTo(cell);
+                BoundCells.Add(cell);
             }
-        }
-        
-        public void BindTo(Cell cell)
-        {
-            BoundCells.Add(cell);
         }
 
         public void Solve(int value)

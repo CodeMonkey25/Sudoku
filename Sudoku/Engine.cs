@@ -4,7 +4,7 @@ namespace Sudoku
 {
     public static class Engine
     {
-        private static readonly string DebugSpacer = new string('*', 40);
+        private static readonly string DebugSpacer = new('*', 40);
         
         public static int[] Solve(int[] puzzle)
         {

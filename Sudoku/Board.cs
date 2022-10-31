@@ -100,7 +100,9 @@ namespace Sudoku
 
             foreach (Cell cell in Cells)
             {
-                sb.AppendLine($"{cell.Index:00} => {string.Join(", ", cell.GetCandidates().OrderBy(i => i))}");
+                sb.Append(cell.Index.ToString("00"));
+                sb.Append(" => ");
+                sb.AppendLine(string.Join(", ", cell.GetCandidates().OrderBy(i => i)));
             }
 
             return sb.ToString();
