@@ -2,9 +2,11 @@
 
 namespace Sudoku
 {
-    public class Engine
+    public static class Engine
     {
-        public int[] Solve(int[] puzzle)
+        private static readonly string DebugSpacer = new string('*', 40);
+        
+        public static int[] Solve(int[] puzzle)
         {
             using Board board = new();
             
@@ -58,10 +60,10 @@ namespace Sudoku
         private static void PrintCandidates(Board board, string message)
         {
             Debug.WriteLine(string.Empty);
-            Debug.WriteLine(new string('*', 40));
+            Debug.WriteLine(DebugSpacer);
             Debug.WriteLine(message);
             Debug.WriteLine(board.CandidatesListing());
-            Debug.WriteLine(new string('*', 40));
+            Debug.WriteLine(DebugSpacer);
             Debug.WriteLine(string.Empty);
         }
     }

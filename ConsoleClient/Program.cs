@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Sudoku;
 
 namespace ConsoleClient
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {
             string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
             // string puzzleText = @"
@@ -25,34 +26,13 @@ namespace ConsoleClient
             // PrintPuzzle(puzzle);
             // Console.WriteLine();
             
-            Engine engine = new();
-            int[] solution = new int[81];
-            string timing = Utility.TimeIt(() => solution = engine.Solve(puzzle));
+            int[] solution = Array.Empty<int>();
+            string timing = Utility.TimeIt(() => solution = Engine.Solve(puzzle));
             PrintPuzzle(solution);
+
             Console.WriteLine(timing);
         }
         
-        private static int[] LoadPuzzle(string puzzle)
-        {
-            // assume comma seperated format (4,,,,9,,,8 ...)
-            string[] strings = puzzle.Split(',');
-            if (strings.Length != 81)
-            {
-                // check for alternate format (530 070 000 ...)
-                strings = puzzle.Where(char.IsDigit).Select(c => c.ToString()).ToArray();
-                    
-                if (strings.Length != 81)
-                    throw new Exception("Puzzle is malformed: cell count is not 81");
-            }
-            if (strings.Any(s => s.Length > 1)) throw new Exception("Puzzle is malformed: all cell lengths are not <= 0");
-
-            char[] chars = strings.Select(s => s == string.Empty ? '0' : s.First()).ToArray();
-            if (!chars.All(char.IsDigit)) throw new Exception("Puzzle is malformed: all cells are not blank or a single digit");
-            
-            int[] ints = chars.Select(c=>c - '0').ToArray();
-
-            return ints;
-        }
 
         private static void PrintPuzzle(int[] puzzle)
         {
@@ -73,6 +53,64 @@ namespace ConsoleClient
 
                 ++cell;
             }
+        }
+        
+        private static int[] LoadPuzzle(string puzzle)
+        {
+            int[] loadedPuzzle = Array.Empty<int>();
+
+            if (!string.IsNullOrEmpty(puzzle))
+            {
+                if (puzzle.Contains(','))
+                    loadedPuzzle = LoadPuzzleWithCommas(puzzle);
+
+                if (puzzle.Contains('0'))
+                    loadedPuzzle = LoadPuzzleWithZeroes(puzzle);
+            }
+
+            if (loadedPuzzle.Length != 81)
+                throw new Exception("Puzzle is malformed: cell count is not 81");
+            
+            return loadedPuzzle;
+        }
+        
+        private static int[] LoadPuzzleWithCommas(string puzzle)
+        {
+            // comma seperated format (4,,,,9,,,8 ...)
+
+            int[] loadedPuzzle = new int[81];
+            int i = 0;
+            foreach (char c in puzzle)
+            {
+                if (i >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
+            
+                switch (c)
+                {
+                    case ',':
+                        i++;
+                        break;
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        loadedPuzzle[i] = c - '0';
+                        break;
+                }
+            }
+            
+            return loadedPuzzle;
+        }
+
+        private static int[] LoadPuzzleWithZeroes(IEnumerable<char> puzzle)
+        {
+            // alternate format (530 070 000 ...)
+            return puzzle.Where(char.IsDigit).Select(c => c - '0').ToArray();
         }
     }
 }

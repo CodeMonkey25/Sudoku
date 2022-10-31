@@ -9,9 +9,9 @@ namespace Sudoku
     public class Board : IDisposable
     {
         private Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(i => new Cell(i)).ToArray();
-        private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(i => new Cell[9]).ToArray();
-        private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(i => new Cell[9]).ToArray();
-        private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(i => new Cell[9]).ToArray();
+        private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
+        private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
+        private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
 
         public bool IsUnsolved => Cells.Any(cell => !cell.IsSolved);
         

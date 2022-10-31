@@ -6,7 +6,7 @@ namespace Sudoku
     // https://stackoverflow.com/a/7244729/2748023
     public sealed class ArrayEqualityComparer<T> : IEqualityComparer<T[]> where T : notnull
     {
-        private static readonly EqualityComparer<T> elementComparer = EqualityComparer<T>.Default;
+        private static readonly EqualityComparer<T> ElementComparer = EqualityComparer<T>.Default;
 
         public bool Equals(T[]? first, T[]? second)
         {
@@ -16,7 +16,7 @@ namespace Sudoku
             
             for (int i = 0; i < first.Length; i++)
             {
-                if (!elementComparer.Equals(first[i], second[i]))
+                if (!ElementComparer.Equals(first[i], second[i]))
                 {
                     return false;
                 }
@@ -32,7 +32,7 @@ namespace Sudoku
                 int hash = 17;
                 foreach (T element in array)
                 {
-                    hash = hash * 31 + elementComparer.GetHashCode(element);
+                    hash = hash * 31 + ElementComparer.GetHashCode(element);
                 }
                 return hash;
             }
