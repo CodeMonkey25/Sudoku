@@ -13,6 +13,7 @@ namespace Sudoku
             
             // the cells are bound to one another when the board ic created
             // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
+            // if a remaining candidate list has only a single value, the cell declares itself solved and notifies its bound cells  
             // this does the majority of the work, but it does not solve every puzzle
             
             int pass = 0;
@@ -42,9 +43,13 @@ namespace Sudoku
             {
                 Debug.WriteLine("Unable to find solution!");
             }
+            else if (board.IsSolutionValid())
+            {
+                Debug.WriteLine("Solution found! :-)");
+            }
             else
             {
-                Debug.WriteLine("Solution found!");
+                Debug.WriteLine("Invalid solution found! :-(");
             }
             
             return board.GetSolution();

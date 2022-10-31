@@ -14,7 +14,7 @@ namespace Sudoku
         private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(i => new Cell[9]).ToArray();
 
         public bool IsUnsolved => Cells.Any(cell => !cell.IsSolved);
-
+        
         public Board()
         {
             InitializeGroupings();
@@ -225,6 +225,35 @@ namespace Sudoku
             }
 
             return boardChanged;
+        }
+
+        public bool IsSolutionValid()
+        {
+            // check rows
+            if (!IsSolutionValid(Rows)) return false;
+
+            // check columns
+            if (!IsSolutionValid(Columns)) return false;
+
+            // check grids
+            if (!IsSolutionValid(Grids)) return false;
+
+            return true;
+        }
+
+        private static bool IsSolutionValid(Cell[][] cellGrouping)
+        {
+            foreach (Cell[] cells in cellGrouping)
+            {
+                if (!IsSolutionValid(cells)) return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsSolutionValid(Cell[] cells)
+        {
+            return cells.Where(cell => cell.IsSolved).Select(cell => cell.Value).Distinct().Count() == 9;
         }
     }
 }
