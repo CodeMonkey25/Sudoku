@@ -13,7 +13,7 @@ namespace Sudoku
             board.LoadPuzzle(puzzle);
             PrintCandidates(board, "Initial setup");
             
-            // the cells are bound to one another when the board ic created
+            // the cells are bound to one another when the board is created
             // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
             // if a remaining candidate list has only a single value, the cell declares itself solved and notifies its bound cells  
             // this does the majority of the work, but it does not solve every puzzle
