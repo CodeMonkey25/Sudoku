@@ -217,7 +217,7 @@ namespace Sudoku
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
-                Debug.WriteLine($"Found deadlock: Cells #({cellsText} locks values {candidatesText}");
+                Debug.WriteLine($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
                 foreach (Cell cell in cells)
                 {
