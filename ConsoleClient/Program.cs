@@ -11,23 +11,9 @@ namespace ConsoleClient
         
         private static void Main()
         {
-            string puzzleText =
-                "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
-            // string puzzleText = @"
-            //     530 070 000
-            //     600 195 000
-            //     098 000 060
-            //     800 060 003
-            //     400 803 001
-            //     700 020 006
-            //     060 000 280
-            //     000 419 005
-            //     000 080 079
-            // ";
-
+            // const string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
+            const string puzzleText = Puzzles.L1N035;
             int[] puzzle = LoadPuzzle(puzzleText);
-            // PrintPuzzle(puzzle);
-            // Console.WriteLine();
 
             int[] solution = Array.Empty<int>();
             string timing = Utility.TimeIt(() => solution = Engine.Solve(puzzle));

@@ -37,7 +37,7 @@ namespace Sudoku
                 // check for deadlocks
                 boardChanged = boardChanged || board.CheckForDeadlockedCells();
 
-                PrintCandidates(board, $"pass #{pass}");
+                PrintCandidates(board, $"Pass #{pass}");
                 if (!boardChanged) break;
             }
 
@@ -61,6 +61,7 @@ namespace Sudoku
         {
             Debug.WriteLine(string.Empty);
             Debug.WriteLine(DebugSpacer);
+            Debug.WriteLine(string.Empty);
             Debug.WriteLine(message);
             Debug.WriteLine(board.CandidatesListing());
             Debug.WriteLine(DebugSpacer);
