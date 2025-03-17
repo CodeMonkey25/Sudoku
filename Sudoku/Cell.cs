@@ -9,12 +9,13 @@ namespace Sudoku
         public int Index { get; }
         public bool IsSolved { get; private set; }
         public int Value { get; private set; }
+        public bool IsGiven { get; set; }
 
         public int[] GetCandidates() => Candidates.ToArray();
         
         private HashSet<int> Candidates { get; } = Enumerable.Range(1, 9).ToHashSet();
         private HashSet<Cell> BoundCells { get; } = new();
-        
+
         public Cell(int index)
         {
             Index = index;

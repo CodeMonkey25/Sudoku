@@ -90,7 +90,9 @@ namespace Sudoku
 
             for (int i = 0; i < puzzle.Length; i++)
             {
-                if (puzzle[i] != 0) Cells[i].Solve(puzzle[i]);
+                if (puzzle[i] == 0) continue;
+                Cells[i].Solve(puzzle[i]);
+                Cells[i].IsGiven = true;
             }
         }
 
@@ -198,8 +200,6 @@ namespace Sudoku
 
         private static bool CheckForDeadlockedCells(Cell[] cells)
         {
-            //   string.Join(" => ", cells.Select(c=> "(" + string.Join(", ", c.GetCandidates()) + ")"))
-
             bool boardChanged = false;
 
             IEqualityComparer<int[]> comparer = new ArrayEqualityComparer<int>();
@@ -207,7 +207,7 @@ namespace Sudoku
             var groups = cells.GroupBy(c => c.GetCandidates(), comparer)
                 .Where(g => g.Count() > 1)
                 .Where(g => g.Count() < 5) // what would be best here? anything under 9?
-                .Where(g => g.Key.Count() == g.Count())
+                .Where(g => g.Key.Length == g.Count())
                 .ToArray();
 
             foreach (IGrouping<IEnumerable<int>, Cell> group in groups)

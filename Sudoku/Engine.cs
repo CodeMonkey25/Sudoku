@@ -43,7 +43,9 @@ namespace Sudoku
 
             if (board.IsUnsolved)
             {
-                Debug.WriteLine("Unable to find solution!");
+                Debug.WriteLine(new string('*', 40));
+                Debug.WriteLine(">>>>> Unable to find solution! <<<<<");
+                Debug.WriteLine(new string('*', 40));
             }
             else if (board.IsSolutionValid())
             {
@@ -53,7 +55,9 @@ namespace Sudoku
             {
                 Debug.WriteLine("Invalid solution found! :-(");
             }
-            
+            Debug.WriteLine($"Number of passes: {pass}");
+
+            Debug.WriteLine(string.Empty);
             return board.GetSolution();
         }
 
