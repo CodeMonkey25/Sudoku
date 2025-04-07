@@ -8,12 +8,12 @@ namespace Sudoku
 {
     public class Board : IDisposable
     {
-        private Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(i => new Cell(i)).ToArray();
-        private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
-        private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
-        private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(_ => new Cell[9]).ToArray();
+        private Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(static i => new Cell(i)).ToArray();
+        private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
+        private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
+        private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
 
-        public bool IsUnsolved => Cells.Any(cell => !cell.IsSolved);
+        public bool IsUnsolved => Cells.Any(static cell => !cell.IsSolved);
         
         public Board()
         {
@@ -35,10 +35,9 @@ namespace Sudoku
             int[] currentColumnIndexes = new int[9];
             int[] currentGridIndexes = new int[9];
 
+            int currentIndex;
             for (int i = 0; i < Cells.Length; i++)
             {
-                int currentIndex;
-
                 int row = i / 9;
                 currentIndex = currentRowIndexes[row]++;
                 Rows[row][currentIndex] = Cells[i];
@@ -55,33 +54,37 @@ namespace Sudoku
 
         private void BindCells()
         {
-            foreach (Cell[] cells in Rows)
+            for (var i = 0; i < Rows.Length; i++)
             {
+                Cell[] cells = Rows[i];
                 BindCells(cells);
             }
 
-            foreach (Cell[] cells in Columns)
+            for (var i = 0; i < Columns.Length; i++)
             {
+                Cell[] cells = Columns[i];
                 BindCells(cells);
             }
 
-            foreach (Cell[] cells in Grids)
+            for (var i = 0; i < Grids.Length; i++)
             {
+                Cell[] cells = Grids[i];
                 BindCells(cells);
             }
         }
 
         private void BindCells(Cell[] cells)
         {
-            foreach (Cell cell in cells)
+            for (var i = 0; i < cells.Length; i++)
             {
+                var cell = cells[i];
                 cell.BindTo(cells);
             }
         }
 
         public int[] GetSolution()
         {
-            return Cells.Select(cell => cell.Value).ToArray();
+            return Cells.Select(static cell => cell.Value).ToArray();
         }
 
         public void LoadPuzzle(int[] puzzle)
@@ -100,11 +103,14 @@ namespace Sudoku
         {
             StringBuilder sb = new();
 
-            foreach (Cell cell in Cells)
+            for (var i = 0; i < Cells.Length; i++)
             {
-                sb.Append(cell.Index.ToString("00"));
+                var cell = Cells[i];
+                if (cell.Index <= 9) sb.Append('0');
+                sb.Append(cell.Index);
                 sb.Append(" => ");
-                sb.AppendLine(string.Join(", ", cell.GetCandidates().OrderBy(i => i)));
+                sb.AppendJoin(", ", cell.Candidates.OrderBy(static i => i));
+                sb.AppendLine();
             }
 
             return sb.ToString();
@@ -124,21 +130,24 @@ namespace Sudoku
         //     return cellChanged;
         // }
 
-
         public bool CheckForLoneCandidates()
         {
-            bool boardChanged = false;
-            foreach (int value in Enumerable.Range(1, 9))
-            {
-                // check rows
-                if (CheckForLoneCandidates(Rows, value)) boardChanged = true;
+            return Enumerable.Range(1, 9)
+                // .AsParallel() // slows things down...
+                .Select(CheckForLoneCandidates)
+                .Aggregate(false, (acc, val) => acc || val);
+        }
 
-                // check columns
-                if (CheckForLoneCandidates(Columns, value)) boardChanged = true;
+        private bool CheckForLoneCandidates(int value)
+        {
+            // check rows
+            bool boardChanged = CheckForLoneCandidates(Rows, value);
 
-                // check grids
-                if (CheckForLoneCandidates(Grids, value)) boardChanged = true;
-            }
+            // check columns
+            if (CheckForLoneCandidates(Columns, value)) boardChanged = true;
+
+            // check grids
+            if (CheckForLoneCandidates(Grids, value)) boardChanged = true;
 
             return boardChanged;
         }
@@ -146,8 +155,9 @@ namespace Sudoku
         private static bool CheckForLoneCandidates(Cell[][] cellGrouping, int value)
         {
             bool boardChanged = false;
-            foreach (Cell[] cells in cellGrouping)
+            for (var i = 0; i < cellGrouping.Length; i++)
             {
+                Cell[] cells = cellGrouping[i];
                 if (CheckForLoneCandidates(cells, value)) boardChanged = true;
             }
 
@@ -157,11 +167,12 @@ namespace Sudoku
         private static bool CheckForLoneCandidates(Cell[] cells, int value)
         {
             Cell? loneCandidate = null;
-            foreach (Cell cell in cells)
+            for (var i = 0; i < cells.Length; i++)
             {
+                var cell = cells[i];
                 if (cell.Value == value) return false; // already solved with this value
                 if (cell.IsSolved) continue; // already solved with a different value
-                if (!cell.GetCandidates().Contains(value)) continue; // can't be this value
+                if (!cell.Candidates.Contains(value)) continue; // can't be this value
                 if (loneCandidate != null) return false; // already have a candidate, so not a lone candidate
 
                 loneCandidate = cell;
@@ -189,38 +200,37 @@ namespace Sudoku
 
         private static bool CheckForDeadlockedCells(Cell[][] cellGrouping)
         {
-            bool boardChanged = false;
-            foreach (Cell[] cells in cellGrouping)
-            {
-                if (CheckForDeadlockedCells(cells)) boardChanged = true;
-            }
-
-            return boardChanged;
+            return cellGrouping
+                // .AsParallel()
+                .Select(CheckForDeadlockedCells)
+                .Aggregate(false, (acc, val) => acc || val);
         }
 
         private static bool CheckForDeadlockedCells(Cell[] cells)
         {
             bool boardChanged = false;
 
-            IEqualityComparer<int[]> comparer = new ArrayEqualityComparer<int>();
+            IEqualityComparer<ISet<int>> comparer = new SetEqualityComparer<int>();
             
-            var groups = cells.GroupBy(c => c.GetCandidates(), comparer)
-                .Where(g => g.Count() > 1)
-                .Where(g => g.Count() < 5) // what would be best here? anything under 9?
-                .Where(g => g.Key.Length == g.Count())
+            var groups = cells.GroupBy(c => c.Candidates, comparer)
+                .Where(static g => g.Count() > 1)
+                .Where(static g => g.Count() < 5) // what would be best here? anything under 9?
+                .Where(static g => g.Key.Count == g.Count())
                 .ToArray();
 
-            foreach (IGrouping<IEnumerable<int>, Cell> group in groups)
+            for (var i = 0; i < groups.Length; i++)
             {
-                HashSet<int> candidates = group.Key.ToHashSet();
+                IGrouping<ISet<int>, Cell> group = groups[i];
+                ISet<int> candidates = group.Key;
                 HashSet<Cell> deadlockedCells = group.ToHashSet();
 
-                string cellsText = string.Join(", ", deadlockedCells.Select(c => c.Index));
+                string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
                 Debug.WriteLine($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
-                foreach (Cell cell in cells)
+                for (var j = 0; j < cells.Length; j++)
                 {
+                    var cell = cells[j];
                     if (deadlockedCells.Contains(cell)) continue;
                     if (cell.RemoveCandidates(candidates)) boardChanged = true;
                 }
@@ -245,8 +255,9 @@ namespace Sudoku
 
         private static bool IsSolutionValid(Cell[][] cellGrouping)
         {
-            foreach (Cell[] cells in cellGrouping)
+            for (var i = 0; i < cellGrouping.Length; i++)
             {
+                Cell[] cells = cellGrouping[i];
                 if (!IsSolutionValid(cells)) return false;
             }
 
@@ -255,7 +266,7 @@ namespace Sudoku
 
         private static bool IsSolutionValid(Cell[] cells)
         {
-            return cells.Where(cell => cell.IsSolved).Select(cell => cell.Value).Distinct().Count() == 9;
+            return cells.Where(static cell => cell.IsSolved).Select(static cell => cell.Value).Distinct().Count() == 9;
         }
     }
 }

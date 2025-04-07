@@ -4,22 +4,15 @@ using System.Linq;
 
 namespace Sudoku
 {
-    public class Cell : IDisposable
+    public class Cell(int index) : IDisposable
     {
-        public int Index { get; }
+        public int Index { get; } = index;
         public bool IsSolved { get; private set; }
         public int Value { get; private set; }
         public bool IsGiven { get; set; }
 
-        public int[] GetCandidates() => Candidates.ToArray();
-        
-        private HashSet<int> Candidates { get; } = Enumerable.Range(1, 9).ToHashSet();
-        private HashSet<Cell> BoundCells { get; } = new();
-
-        public Cell(int index)
-        {
-            Index = index;
-        }
+        public HashSet<int> Candidates { get; } = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        private HashSet<Cell> BoundCells { get; } = new(24);
 
         public void Dispose()
         {
@@ -27,15 +20,16 @@ namespace Sudoku
             BoundCells.Clear();
         }
 
-        public void BindTo(IEnumerable<Cell> cells)
+        public void BindTo(Cell[] cells)
         {
-            foreach (Cell cell in cells)
+            for (var i = 0; i < cells.Length; i++)
             {
+                var cell = cells[i];
                 if (cell == this) continue;
                 BoundCells.Add(cell);
             }
         }
-
+        
         public void Solve(int value)
         {
             if (IsSolved)
@@ -64,7 +58,7 @@ namespace Sudoku
             }
         }
 
-        public bool RemoveCandidate(int value)
+        private bool RemoveCandidate(int value)
         {
             if (IsSolved)
             {

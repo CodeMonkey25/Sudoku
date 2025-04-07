@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Sudoku;
 
@@ -12,7 +11,7 @@ namespace ConsoleClient
         private static void Main()
         {
             // const string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
-            const string puzzleText = Puzzles.L2N116;
+            const string puzzleText = Puzzles.L2N122;
             int[] puzzle = LoadPuzzle(puzzleText);
 
             int[] solution = Array.Empty<int>();
@@ -26,9 +25,10 @@ namespace ConsoleClient
         {
             Console.WriteLine(RowDivider);
             int cell = 1;
-            foreach (int i in puzzle)
+            for (var i = 0; i < puzzle.Length; i++)
             {
-                char c = (char)('0' + i);
+                var num = puzzle[i];
+                char c = (char)('0' + num);
                 Console.Write('|');
                 Console.Write(c == '0' ? ' ' : c);
 
@@ -48,11 +48,11 @@ namespace ConsoleClient
 
             if (!string.IsNullOrEmpty(puzzle))
             {
+                if (puzzle.Contains(' '))
+                    loadedPuzzle = LoadPuzzleWithSpaces(puzzle);
+                
                 if (puzzle.Contains(','))
                     loadedPuzzle = LoadPuzzleWithCommas(puzzle);
-
-                if (puzzle.Contains('0'))
-                    loadedPuzzle = LoadPuzzleWithZeroes(puzzle);
             }
 
             if (loadedPuzzle.Length != 81)
@@ -94,10 +94,18 @@ namespace ConsoleClient
             return loadedPuzzle;
         }
 
-        private static int[] LoadPuzzleWithZeroes(IEnumerable<char> puzzle)
+        private static int[] LoadPuzzleWithSpaces(string puzzle)
         {
             // alternate format (530 070 000 ...)
-            return puzzle.Where(char.IsDigit).Select(c => c - '0').ToArray();
+
+            for (var i = 0; i < puzzle.Length; i++)
+            {
+                var c = puzzle[i];
+                if (!char.IsDigit(c)) continue;
+                
+            }
+
+            return puzzle.Where(static c => char.IsDigit(c)).Select(static c => c - '0').ToArray();
         }
     }
 }
