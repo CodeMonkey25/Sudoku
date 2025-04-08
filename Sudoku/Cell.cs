@@ -6,27 +6,26 @@ namespace Sudoku
 {
     public class Cell(int index) : IDisposable
     {
-        public int Index { get; } = index;
-        public bool IsSolved { get; private set; }
-        public int Value { get; private set; }
-        public bool IsGiven { get; set; }
+        public readonly int Index = index;
+        public bool IsSolved;
+        public int Value;
+        public bool IsGiven;
 
-        public HashSet<int> Candidates { get; } = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        private HashSet<Cell> BoundCells { get; } = new(24);
+        public readonly HashSet<int> Candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        private readonly List<Cell> _boundCells = new(24);
 
         public void Dispose()
         {
             Candidates.Clear();
-            BoundCells.Clear();
+            _boundCells.Clear();
         }
 
         public void BindTo(Cell[] cells)
         {
             for (var i = 0; i < cells.Length; i++)
             {
-                var cell = cells[i];
-                if (cell == this) continue;
-                BoundCells.Add(cell);
+                if (cells[i] == this) continue;
+                _boundCells.Add(cells[i]);
             }
         }
         
@@ -52,9 +51,9 @@ namespace Sudoku
             IsSolved = true;
             Value = value;
 
-            foreach (Cell boundCell in BoundCells)
+            for (int i = 0; i < _boundCells.Count; i++)
             {
-                boundCell.RemoveCandidate(value);
+                _boundCells[i].RemoveCandidate(value);
             }
         }
 
@@ -72,9 +71,8 @@ namespace Sudoku
 
             if (!Candidates.Remove(value)) return false;
 
-            int count = Candidates.Count;
-            if (count == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
-            if (count == 1) Solve(Candidates.First());
+            if (Candidates.Count == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
+            if (Candidates.Count == 1) Solve(Candidates.First());
             return true;
         }
 

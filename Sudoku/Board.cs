@@ -56,20 +56,17 @@ namespace Sudoku
         {
             for (var i = 0; i < Rows.Length; i++)
             {
-                Cell[] cells = Rows[i];
-                BindCells(cells);
+                BindCells(Rows[i]);
             }
 
             for (var i = 0; i < Columns.Length; i++)
             {
-                Cell[] cells = Columns[i];
-                BindCells(cells);
+                BindCells(Columns[i]);
             }
 
             for (var i = 0; i < Grids.Length; i++)
             {
-                Cell[] cells = Grids[i];
-                BindCells(cells);
+                BindCells(Grids[i]);
             }
         }
 
@@ -77,8 +74,7 @@ namespace Sudoku
         {
             for (var i = 0; i < cells.Length; i++)
             {
-                var cell = cells[i];
-                cell.BindTo(cells);
+                cells[i].BindTo(cells);
             }
         }
 
@@ -157,8 +153,7 @@ namespace Sudoku
             bool boardChanged = false;
             for (var i = 0; i < cellGrouping.Length; i++)
             {
-                Cell[] cells = cellGrouping[i];
-                if (CheckForLoneCandidates(cells, value)) boardChanged = true;
+                if (CheckForLoneCandidates(cellGrouping[i], value)) boardChanged = true;
             }
 
             return boardChanged;
@@ -169,13 +164,12 @@ namespace Sudoku
             Cell? loneCandidate = null;
             for (var i = 0; i < cells.Length; i++)
             {
-                var cell = cells[i];
-                if (cell.Value == value) return false; // already solved with this value
-                if (cell.IsSolved) continue; // already solved with a different value
-                if (!cell.Candidates.Contains(value)) continue; // can't be this value
+                if (cells[i].Value == value) return false; // already solved with this value
+                if (cells[i].IsSolved) continue; // already solved with a different value
+                if (!cells[i].Candidates.Contains(value)) continue; // can't be this value
                 if (loneCandidate != null) return false; // already have a candidate, so not a lone candidate
 
-                loneCandidate = cell;
+                loneCandidate = cells[i];
             }
 
             if (loneCandidate == null) return false;
@@ -220,9 +214,8 @@ namespace Sudoku
 
             for (var i = 0; i < groups.Length; i++)
             {
-                IGrouping<ISet<int>, Cell> group = groups[i];
-                ISet<int> candidates = group.Key;
-                HashSet<Cell> deadlockedCells = group.ToHashSet();
+                ISet<int> candidates = groups[i].Key;
+                HashSet<Cell> deadlockedCells = groups[i].ToHashSet();
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
@@ -230,9 +223,8 @@ namespace Sudoku
 
                 for (var j = 0; j < cells.Length; j++)
                 {
-                    var cell = cells[j];
-                    if (deadlockedCells.Contains(cell)) continue;
-                    if (cell.RemoveCandidates(candidates)) boardChanged = true;
+                    if (deadlockedCells.Contains(cells[j])) continue;
+                    if (cells[j].RemoveCandidates(candidates)) boardChanged = true;
                 }
             }
 
@@ -257,8 +249,7 @@ namespace Sudoku
         {
             for (var i = 0; i < cellGrouping.Length; i++)
             {
-                Cell[] cells = cellGrouping[i];
-                if (!IsSolutionValid(cells)) return false;
+                if (!IsSolutionValid(cellGrouping[i])) return false;
             }
 
             return true;
@@ -266,7 +257,14 @@ namespace Sudoku
 
         private static bool IsSolutionValid(Cell[] cells)
         {
-            return cells.Where(static cell => cell.IsSolved).Select(static cell => cell.Value).Distinct().Count() == 9;
+            HashSet<int> values = new();
+            for (var i = 0; i < cells.Length; i++)
+            {
+                if (!cells[i].IsSolved) return false;
+                values.Add(cells[i].Value);
+            }
+
+            return values.Count == 9;
         }
     }
 }

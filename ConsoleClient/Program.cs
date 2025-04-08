@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Linq;
 using Sudoku;
 
 namespace ConsoleClient
 {
     internal static class Program
     {
-        private static readonly string RowDivider = new('-', 19);
-        
         private static void Main()
         {
             // const string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
@@ -23,7 +20,10 @@ namespace ConsoleClient
 
         private static void PrintPuzzle(int[] puzzle)
         {
-            Console.WriteLine(RowDivider);
+            char[] rowDivider = new char[19];
+            Array.Fill(rowDivider, '-');
+            
+            Console.WriteLine(rowDivider);
             int cell = 1;
             for (var i = 0; i < puzzle.Length; i++)
             {
@@ -35,7 +35,7 @@ namespace ConsoleClient
                 if (cell % 9 == 0)
                 {
                     Console.WriteLine('|');
-                    Console.WriteLine(RowDivider);
+                    Console.WriteLine(rowDivider);
                 }
 
                 ++cell;
@@ -90,6 +90,7 @@ namespace ConsoleClient
                         break;
                 }
             }
+            if (i != (loadedPuzzle.Length - 1)) throw new Exception("Puzzle is malformed: cell count is not 81");
 
             return loadedPuzzle;
         }
@@ -98,14 +99,16 @@ namespace ConsoleClient
         {
             // alternate format (530 070 000 ...)
 
+            int j = 0;
+            int[] loadedPuzzle = new int[81];
             for (var i = 0; i < puzzle.Length; i++)
             {
                 var c = puzzle[i];
-                if (!char.IsDigit(c)) continue;
-                
+                if (char.IsDigit(c)) 
+                    loadedPuzzle[j++] = c - '0';
             }
-
-            return puzzle.Where(static c => char.IsDigit(c)).Select(static c => c - '0').ToArray();
+            if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
+            return loadedPuzzle;
         }
     }
 }

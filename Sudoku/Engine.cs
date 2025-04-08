@@ -4,8 +4,6 @@ namespace Sudoku
 {
     public static class Engine
     {
-        private static readonly string DebugSpacer = new('*', 40);
-        
         public static int[] Solve(int[] puzzle)
         {
             using Board board = new();
@@ -43,9 +41,11 @@ namespace Sudoku
 
             if (board.IsUnsolved)
             {
-                Debug.WriteLine(new string('*', 40));
+                string divider = new('*', 40);
+
+                Debug.WriteLine(divider);
                 Debug.WriteLine(">>>>> Unable to find solution! <<<<<");
-                Debug.WriteLine(new string('*', 40));
+                Debug.WriteLine(divider);
             }
             else if (board.IsSolutionValid())
             {
@@ -63,12 +63,14 @@ namespace Sudoku
 
         private static void PrintCandidates(Board board, string message)
         {
+            string debugSpacer = new('*', 40);
+            
             Debug.WriteLine(string.Empty);
-            Debug.WriteLine(DebugSpacer);
+            Debug.WriteLine(debugSpacer);
             Debug.WriteLine(string.Empty);
             Debug.WriteLine(message);
             Debug.WriteLine(board.CandidatesListing());
-            Debug.WriteLine(DebugSpacer);
+            Debug.WriteLine(debugSpacer);
             Debug.WriteLine(string.Empty);
         }
     }
