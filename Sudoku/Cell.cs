@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sudoku
 {
-    public class Cell(int index) : IDisposable
+    internal sealed class Cell(int index) : IDisposable
     {
         public readonly int Index = index;
         public bool IsSolved;

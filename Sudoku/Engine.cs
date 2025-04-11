@@ -17,7 +17,7 @@ namespace Sudoku
             // this does the majority of the work, but it does not solve every puzzle
             
             int pass = 0;
-            while (board.IsUnsolved)
+            while (board.IsUnsolved())
             {
                 pass++;
                 bool boardChanged = false;
@@ -39,7 +39,7 @@ namespace Sudoku
                 if (!boardChanged) break;
             }
 
-            if (board.IsUnsolved)
+            if (board.IsUnsolved())
             {
                 string divider = new('*', 40);
 

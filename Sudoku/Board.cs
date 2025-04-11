@@ -6,15 +6,13 @@ using System.Text;
 
 namespace Sudoku
 {
-    public class Board : IDisposable
+    internal sealed class Board : IDisposable
     {
         private Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(static i => new Cell(i)).ToArray();
         private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
         private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
         private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
 
-        public bool IsUnsolved => Cells.Any(static cell => !cell.IsSolved);
-        
         public Board()
         {
             InitializeGroupings();
@@ -31,9 +29,9 @@ namespace Sudoku
 
         private void InitializeGroupings()
         {
-            int[] currentRowIndexes = new int[9];
-            int[] currentColumnIndexes = new int[9];
-            int[] currentGridIndexes = new int[9];
+            Span<int> currentRowIndexes = stackalloc int[9];
+            Span<int> currentColumnIndexes = stackalloc int[9];
+            Span<int> currentGridIndexes = stackalloc int[9];
 
             int currentIndex;
             for (int i = 0; i < Cells.Length; i++)
@@ -70,7 +68,7 @@ namespace Sudoku
             }
         }
 
-        private void BindCells(Cell[] cells)
+        private static void BindCells(Cell[] cells)
         {
             for (var i = 0; i < cells.Length; i++)
             {
@@ -129,7 +127,7 @@ namespace Sudoku
         public bool CheckForLoneCandidates()
         {
             return Enumerable.Range(1, 9)
-                // .AsParallel() // slows things down...
+                // .AsParallel() // bad idea, race condition on candidates
                 .Select(CheckForLoneCandidates)
                 .Aggregate(false, (acc, val) => acc || val);
         }
@@ -195,7 +193,7 @@ namespace Sudoku
         private static bool CheckForDeadlockedCells(Cell[][] cellGrouping)
         {
             return cellGrouping
-                // .AsParallel()
+                // .AsParallel() // bad idea, race condition on candidates
                 .Select(CheckForDeadlockedCells)
                 .Aggregate(false, (acc, val) => acc || val);
         }
@@ -229,6 +227,16 @@ namespace Sudoku
             }
 
             return boardChanged;
+        }
+
+        public bool IsUnsolved()
+        {
+            for (int i = 0; i < Cells.Length; i++)
+            {
+                if (!Cells[i].IsSolved) 
+                    return true;
+            }
+            return false;
         }
 
         public bool IsSolutionValid()

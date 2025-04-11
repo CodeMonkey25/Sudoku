@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using Sudoku;
+using Sudoku.Extensions;
 
 namespace ConsoleClient
 {
@@ -11,11 +13,24 @@ namespace ConsoleClient
             const string puzzleText = Puzzles.L2N122;
             int[] puzzle = LoadPuzzle(puzzleText);
 
-            int[] solution = Array.Empty<int>();
-            string timing = Utility.TimeIt(() => solution = Engine.Solve(puzzle));
+            int[] solution = [];
+            string timing = TimeIt(() => solution = Engine.Solve(puzzle));
             PrintPuzzle(solution);
 
             Console.WriteLine(timing);
+        }
+
+        private static string TimeIt(Action action, int count = 1)
+        {
+            Stopwatch watch = Stopwatch.StartNew();
+            while (count > 0)
+            {
+                action.Invoke();
+                --count;
+            }
+
+            watch.Stop();
+            return $"Total time: {watch.Elapsed.ReadableTime()}";
         }
 
         private static void PrintPuzzle(int[] puzzle)
