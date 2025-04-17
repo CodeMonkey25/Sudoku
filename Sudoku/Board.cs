@@ -33,11 +33,10 @@ namespace Sudoku
             Span<int> currentColumnIndexes = stackalloc int[9];
             Span<int> currentGridIndexes = stackalloc int[9];
 
-            int currentIndex;
             for (int i = 0; i < Cells.Length; i++)
             {
                 int row = i / 9;
-                currentIndex = currentRowIndexes[row]++;
+                int currentIndex = currentRowIndexes[row]++;
                 Rows[row][currentIndex] = Cells[i];
 
                 int col = i % 9;
@@ -52,27 +51,27 @@ namespace Sudoku
 
         private void BindCells()
         {
-            for (var i = 0; i < Rows.Length; i++)
+            foreach (Cell[] cell in Rows)
             {
-                BindCells(Rows[i]);
+                BindCells(cell);
             }
 
-            for (var i = 0; i < Columns.Length; i++)
+            foreach (Cell[] cell in Columns)
             {
-                BindCells(Columns[i]);
+                BindCells(cell);
             }
 
-            for (var i = 0; i < Grids.Length; i++)
+            foreach (Cell[] cell in Grids)
             {
-                BindCells(Grids[i]);
+                BindCells(cell);
             }
         }
 
         private static void BindCells(Cell[] cells)
         {
-            for (var i = 0; i < cells.Length; i++)
+            foreach (Cell cell in cells)
             {
-                cells[i].BindTo(cells);
+                cell.BindTo(cells);
             }
         }
 
@@ -97,9 +96,8 @@ namespace Sudoku
         {
             StringBuilder sb = new();
 
-            for (var i = 0; i < Cells.Length; i++)
+            foreach (Cell cell in Cells)
             {
-                var cell = Cells[i];
                 if (cell.Index <= 9) sb.Append('0');
                 sb.Append(cell.Index);
                 sb.Append(" => ");
@@ -149,9 +147,9 @@ namespace Sudoku
         private static bool CheckForLoneCandidates(Cell[][] cellGrouping, int value)
         {
             bool boardChanged = false;
-            for (var i = 0; i < cellGrouping.Length; i++)
+            foreach (Cell[] cell in cellGrouping)
             {
-                if (CheckForLoneCandidates(cellGrouping[i], value)) boardChanged = true;
+                if (CheckForLoneCandidates(cell, value)) boardChanged = true;
             }
 
             return boardChanged;
@@ -160,14 +158,14 @@ namespace Sudoku
         private static bool CheckForLoneCandidates(Cell[] cells, int value)
         {
             Cell? loneCandidate = null;
-            for (var i = 0; i < cells.Length; i++)
+            foreach (Cell cell in cells)
             {
-                if (cells[i].Value == value) return false; // already solved with this value
-                if (cells[i].IsSolved) continue; // already solved with a different value
-                if (!cells[i].Candidates.Contains(value)) continue; // can't be this value
+                if (cell.Value == value) return false; // already solved with this value
+                if (cell.IsSolved) continue; // already solved with a different value
+                if (!cell.Candidates.Contains(value)) continue; // can't be this value
                 if (loneCandidate != null) return false; // already have a candidate, so not a lone candidate
 
-                loneCandidate = cells[i];
+                loneCandidate = cell;
             }
 
             if (loneCandidate == null) return false;
@@ -210,19 +208,19 @@ namespace Sudoku
                 .Where(static g => g.Key.Count == g.Count())
                 .ToArray();
 
-            for (var i = 0; i < groups.Length; i++)
+            foreach (IGrouping<ISet<int>, Cell> grouping in groups)
             {
-                ISet<int> candidates = groups[i].Key;
-                HashSet<Cell> deadlockedCells = groups[i].ToHashSet();
+                ISet<int> candidates = grouping.Key;
+                HashSet<Cell> deadlockedCells = grouping.ToHashSet();
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
                 Debug.WriteLine($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
-                for (var j = 0; j < cells.Length; j++)
+                foreach (Cell cell in cells)
                 {
-                    if (deadlockedCells.Contains(cells[j])) continue;
-                    if (cells[j].RemoveCandidates(candidates)) boardChanged = true;
+                    if (deadlockedCells.Contains(cell)) continue;
+                    if (cell.RemoveCandidates(candidates)) boardChanged = true;
                 }
             }
 
@@ -231,12 +229,7 @@ namespace Sudoku
 
         public bool IsUnsolved()
         {
-            for (int i = 0; i < Cells.Length; i++)
-            {
-                if (!Cells[i].IsSolved) 
-                    return true;
-            }
-            return false;
+            return Cells.Any(cell => !cell.IsSolved);
         }
 
         public bool IsSolutionValid()
@@ -255,21 +248,16 @@ namespace Sudoku
 
         private static bool IsSolutionValid(Cell[][] cellGrouping)
         {
-            for (var i = 0; i < cellGrouping.Length; i++)
-            {
-                if (!IsSolutionValid(cellGrouping[i])) return false;
-            }
-
-            return true;
+            return cellGrouping.All(IsSolutionValid);
         }
 
         private static bool IsSolutionValid(Cell[] cells)
         {
-            HashSet<int> values = new();
-            for (var i = 0; i < cells.Length; i++)
+            HashSet<int> values = [];
+            foreach (Cell cell in cells)
             {
-                if (!cells[i].IsSolved) return false;
-                values.Add(cells[i].Value);
+                if (!cell.IsSolved) return false;
+                values.Add(cell.Value);
             }
 
             return values.Count == 9;

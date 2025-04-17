@@ -22,10 +22,10 @@ namespace Sudoku
 
         public void BindTo(Cell[] cells)
         {
-            for (var i = 0; i < cells.Length; i++)
+            foreach (Cell cell in cells)
             {
-                if (cells[i] == this) continue;
-                _boundCells.Add(cells[i]);
+                if (cell == this) continue;
+                _boundCells.Add(cell);
             }
         }
         
@@ -51,9 +51,9 @@ namespace Sudoku
             IsSolved = true;
             Value = value;
 
-            for (int i = 0; i < _boundCells.Count; i++)
+            foreach (Cell cell in _boundCells)
             {
-                _boundCells[i].RemoveCandidate(value);
+                cell.RemoveCandidate(value);
             }
         }
 

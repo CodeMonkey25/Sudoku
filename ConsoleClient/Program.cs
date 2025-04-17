@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using Sudoku;
 using Sudoku.Extensions;
 
@@ -40,9 +41,8 @@ namespace ConsoleClient
             
             Console.WriteLine(rowDivider);
             int cell = 1;
-            for (var i = 0; i < puzzle.Length; i++)
+            foreach (int num in puzzle)
             {
-                var num = puzzle[i];
                 char c = (char)('0' + num);
                 Console.Write('|');
                 Console.Write(c == '0' ? ' ' : c);
@@ -116,11 +116,9 @@ namespace ConsoleClient
 
             int j = 0;
             int[] loadedPuzzle = new int[81];
-            for (var i = 0; i < puzzle.Length; i++)
+            foreach (char c in puzzle.Where(char.IsDigit))
             {
-                var c = puzzle[i];
-                if (char.IsDigit(c)) 
-                    loadedPuzzle[j++] = c - '0';
+                loadedPuzzle[j++] = c - '0';
             }
             if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
             return loadedPuzzle;
