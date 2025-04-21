@@ -79,21 +79,35 @@ namespace Sudoku
         public bool RemoveCandidates(IEnumerable<int> candidates)
         {
             bool cellChanged = false;
-            foreach (int candidate in candidates)
+            foreach (int candidate in candidates.ToArray())
             {
                 if (RemoveCandidate(candidate)) cellChanged = true;
             }
             return cellChanged;
         }
+
+        public void Reset()
+        {
+            Value = 0;
+            Candidates.Clear();
+            Candidates.UnionWith([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            IsSolved = false;
+        }
         
-        // public bool AttemptToSolve()
-        // {
-        //     if (IsSolved) return false;
-        //     if (Candidates.Count != 1) return false;
-        //     
-        //     Solve(Candidates.First());
-        //     
-        //     return true;
-        // }
+        public HashSet<int> GetState()
+        {
+            return Candidates.ToHashSet();
+        }
+
+        public void SetState(HashSet<int> state)
+        {
+            Candidates.Clear();
+            Candidates.UnionWith(state);
+            if (Candidates.Count == 1)
+            {
+                IsSolved = true;
+                Value = Candidates.First();
+            }
+        }
     }
 }

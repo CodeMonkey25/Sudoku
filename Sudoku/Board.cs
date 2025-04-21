@@ -80,6 +80,25 @@ namespace Sudoku
             return Cells.Select(static cell => cell.Value).ToArray();
         }
 
+        public HashSet<int>[] GetState()
+        {
+            return Cells.Select(static cell => cell.GetState()).ToArray();
+        }
+        
+        public void RestoreState(HashSet<int>[] state)
+        {
+            foreach (Cell cell in Cells)
+            {
+                cell.Reset();
+            }
+
+            for (int i = 0; i < state.Length; i++)
+            {
+                HashSet<int> cellState = state[i];
+                Cells[i].SetState(cellState);
+            }
+        }
+
         public void LoadPuzzle(int[] puzzle)
         {
             if (puzzle.Length != Cells.Length) throw new Exception("Puzzle length does not match board length!");
@@ -232,6 +251,11 @@ namespace Sudoku
             return Cells.Any(cell => !cell.IsSolved);
         }
 
+        public bool IsSolved()
+        {
+            return Cells.All(cell => cell.IsSolved);
+        }
+
         public bool IsSolutionValid()
         {
             // check rows
@@ -261,6 +285,13 @@ namespace Sudoku
             }
 
             return values.Count == 9;
+        }
+
+        public Cell GetCellWithLeastAmountOfCandidates()
+        {
+            return Cells
+                .Where(static c => !c.IsSolved)
+                .MinBy(static c => c.Candidates.Count)!;
         }
     }
 }
