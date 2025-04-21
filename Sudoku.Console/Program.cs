@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using Sudoku;
 using Sudoku.Extensions;
 
-namespace ConsoleClient
+namespace Sudoku
 {
     internal static class Program
     {
@@ -59,7 +58,7 @@ namespace ConsoleClient
 
         private static int[] LoadPuzzle(string puzzle)
         {
-            int[] loadedPuzzle = Array.Empty<int>();
+            int[] loadedPuzzle = [];
 
             if (!string.IsNullOrEmpty(puzzle))
             {

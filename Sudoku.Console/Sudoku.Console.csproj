@@ -3,8 +3,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>default</LangVersion>
+    <RootNamespace>Sudoku</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sudoku\Sudoku.csproj" />
+    <ProjectReference Include="..\Sudoku.Core\Sudoku.Core.csproj" />
   </ItemGroup>
 </Project>
