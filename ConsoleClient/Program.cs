@@ -118,6 +118,7 @@ namespace ConsoleClient
             int[] loadedPuzzle = new int[81];
             foreach (char c in puzzle.Where(char.IsDigit))
             {
+                if (j >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
                 loadedPuzzle[j++] = c - '0';
             }
             if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");

@@ -53,8 +53,10 @@ namespace Sudoku
 
         private static bool _solveLoop(Board board, ref int pass)
         {
+            // try to solve the puzzle logically
             if (_solveLogically(board, ref pass)) return true;
 
+            // try to guess the solution by checking candidates
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
             foreach (int value in cell.Candidates.ToArray())
             {
