@@ -4,6 +4,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sudoku.Console", "Sudoku.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sudoku.Core", "Sudoku.Core\Sudoku.Core.csproj", "{92EE4E3E-9CFB-463B-8B17-677A39A32E16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku.Desktop", "Sudoku.Desktop\Sudoku.Desktop.csproj", "{0B9B568D-376A-4788-ADC4-CDAE5516CEEE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{92EE4E3E-9CFB-463B-8B17-677A39A32E16} = {92EE4E3E-9CFB-463B-8B17-677A39A32E16}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +23,9 @@ Global
 		{92EE4E3E-9CFB-463B-8B17-677A39A32E16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92EE4E3E-9CFB-463B-8B17-677A39A32E16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92EE4E3E-9CFB-463B-8B17-677A39A32E16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B9B568D-376A-4788-ADC4-CDAE5516CEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B9B568D-376A-4788-ADC4-CDAE5516CEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B9B568D-376A-4788-ADC4-CDAE5516CEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B9B568D-376A-4788-ADC4-CDAE5516CEEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

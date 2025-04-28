@@ -1,0 +1,39 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="vm:MainWindowViewModel" 
+                           xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:vm="using:Sudoku.ViewModels"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:views="clr-namespace:Sudoku.Views"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                           x:Class="Sudoku.Views.MainWindow"
+                           x:DataType="vm:MainWindowViewModel"
+                           Icon="/Assets/avalonia-logo.ico"
+                           Title="Sudoku Solver"
+                           Width="550" Height="550">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto,*">
+        <Menu Grid.Row="0" Grid.Column="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Load Puzzle..." InputGesture="Ctrl + L" HotKey="CTRL+l" Command="{Binding $parent[views:MainWindow].LoadPuzzleCommand}" />
+                <Separator/>
+                <MenuItem Header="_Exit" InputGesture="Ctrl + X" HotKey="CTRL+x" Command="{Binding $parent[views:MainWindow].ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="Copy" IsEnabled="False" />
+                <MenuItem Header="Paste" IsEnabled="False" />
+            </MenuItem>
+            <MenuItem Header="_Solver">
+                <MenuItem Header="Run Solver..." Command="{Binding $parent[views:MainWindow].RunSolverCommand}" />
+            </MenuItem>
+        </Menu>
+        
+        <views:BoardView Grid.Row="1" Grid.Column="0" Name="Board" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Grid>
+
+</reactiveUi:ReactiveWindow>

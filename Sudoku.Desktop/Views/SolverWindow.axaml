@@ -1,0 +1,21 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:SolverWindowViewModel" 
+                           xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+                           x:Class="Sudoku.Views.SolverWindow"
+                           Title="Solver"
+                           Width="800" Height="500"
+                           x:DataType="viewModels:SolverWindowViewModel">
+    
+    <Design.DataContext>
+        <viewModels:SolverWindowViewModel/>
+    </Design.DataContext>
+    
+    <ScrollViewer>
+        <TextBox Margin="5" Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" />
+    </ScrollViewer>
+</reactiveUi:ReactiveWindow>

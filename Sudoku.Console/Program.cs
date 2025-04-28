@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using Sudoku.Extensions;
 
 namespace Sudoku
@@ -10,11 +9,12 @@ namespace Sudoku
         private static void Main()
         {
             // const string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
-            const string puzzleText = Puzzles.L5N322;
-            int[] puzzle = LoadPuzzle(puzzleText);
+            const string puzzleText = Puzzles.L3N126;
+            int[] puzzle = Board.ParsePuzzle(puzzleText);
 
+            Engine engine = new(Console.WriteLine);
             int[] solution = [];
-            string timing = TimeIt(() => solution = Engine.Solve(puzzle));
+            string timing = TimeIt(() => solution = engine.Solve(puzzle));
             PrintPuzzle(solution);
 
             Console.WriteLine(timing);
@@ -54,74 +54,6 @@ namespace Sudoku
 
                 ++cell;
             }
-        }
-
-        private static int[] LoadPuzzle(string puzzle)
-        {
-            int[] loadedPuzzle = [];
-
-            if (!string.IsNullOrEmpty(puzzle))
-            {
-                if (puzzle.Contains(' '))
-                    loadedPuzzle = LoadPuzzleWithSpaces(puzzle);
-                
-                if (puzzle.Contains(','))
-                    loadedPuzzle = LoadPuzzleWithCommas(puzzle);
-            }
-
-            if (loadedPuzzle.Length != 81)
-                throw new Exception("Puzzle is malformed: cell count is not 81");
-
-            return loadedPuzzle;
-        }
-
-        private static int[] LoadPuzzleWithCommas(string puzzle)
-        {
-            // comma seperated format (4,,,,9,,,8 ...)
-
-            int[] loadedPuzzle = new int[81];
-            int i = 0;
-            foreach (char c in puzzle)
-            {
-                if (i >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
-
-                switch (c)
-                {
-                    case ',':
-                        i++;
-                        break;
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        loadedPuzzle[i] = c - '0';
-                        break;
-                }
-            }
-            if (i != (loadedPuzzle.Length - 1)) throw new Exception("Puzzle is malformed: cell count is not 81");
-
-            return loadedPuzzle;
-        }
-
-        private static int[] LoadPuzzleWithSpaces(string puzzle)
-        {
-            // alternate format (530 070 000 ...)
-
-            int j = 0;
-            int[] loadedPuzzle = new int[81];
-            foreach (char c in puzzle.Where(char.IsDigit))
-            {
-                if (j >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
-                loadedPuzzle[j++] = c - '0';
-            }
-            if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
-            return loadedPuzzle;
         }
     }
 }

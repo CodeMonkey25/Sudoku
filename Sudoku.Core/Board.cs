@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace Sudoku
 {
-    internal sealed class Board : IDisposable
+    public sealed class Board : IDisposable
     {
-        private Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(static i => new Cell(i)).ToArray();
+        public Cell[] Cells { get; } = Enumerable.Range(0, 81).Select(static i => new Cell(i)).ToArray();
         private Cell[][] Rows { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
         private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
         private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
@@ -75,6 +74,11 @@ namespace Sudoku
             }
         }
 
+        public string GetOriginalPuzzle()
+        {
+            return string.Join(",", Cells.Select(static cell => cell.Value == 0 ? string.Empty : cell.Value.ToString()));
+        }
+
         public int[] GetSolution()
         {
             return Cells.Select(static cell => cell.Value).ToArray();
@@ -99,9 +103,84 @@ namespace Sudoku
             }
         }
 
+        public static int[] ParsePuzzle(string puzzle)
+        {
+            int[] loadedPuzzle = [];
+
+            if (!string.IsNullOrEmpty(puzzle))
+            {
+                if (puzzle.Contains(' '))
+                    loadedPuzzle = ParsePuzzleWithSpaces(puzzle);
+
+                if (puzzle.Contains(','))
+                    loadedPuzzle = ParsePuzzleWithCommas(puzzle);
+            }
+
+            if (loadedPuzzle.Length != 81)
+                throw new Exception("Puzzle is malformed: cell count is not 81");
+
+            return loadedPuzzle;
+        }
+
+        private static int[] ParsePuzzleWithCommas(string puzzle)
+        {
+            // comma seperated format (4,,,,9,,,8 ...)
+
+            int[] loadedPuzzle = new int[81];
+            int i = 0;
+            foreach (char c in puzzle)
+            {
+                if (i >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
+
+                switch (c)
+                {
+                    case ',':
+                        i++;
+                        break;
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        loadedPuzzle[i] = c - '0';
+                        break;
+                }
+            }
+
+            if (i != (loadedPuzzle.Length - 1)) throw new Exception("Puzzle is malformed: cell count is not 81");
+
+            return loadedPuzzle;
+        }
+
+        private static int[] ParsePuzzleWithSpaces(string puzzle)
+        {
+            // alternate format (530 070 000 ...)
+
+            int j = 0;
+            int[] loadedPuzzle = new int[81];
+            foreach (char c in puzzle.Where(char.IsDigit))
+            {
+                if (j >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
+                loadedPuzzle[j++] = c - '0';
+            }
+
+            if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
+            return loadedPuzzle;
+        }
+            
         public void LoadPuzzle(int[] puzzle)
         {
             if (puzzle.Length != Cells.Length) throw new Exception("Puzzle length does not match board length!");
+
+            for (int i = 0; i < puzzle.Length; i++)
+            {
+                Cells[i].Reset();
+            }
 
             for (int i = 0; i < puzzle.Length; i++)
             {
@@ -127,54 +206,40 @@ namespace Sudoku
             return sb.ToString();
         }
 
-        // public bool CheckForSolvedCells()
-        // {
-        //     bool cellChanged = false;
-        //     foreach (Cell cell in Cells)
-        //     {
-        //         if (cell.AttemptToSolve())
-        //         {
-        //             cellChanged = true;
-        //         }
-        //     }
-        //
-        //     return cellChanged;
-        // }
-
-        public bool CheckForLoneCandidates()
+        public bool CheckForLoneCandidates(Action<string> log)
         {
             return Enumerable.Range(1, 9)
                 // .AsParallel() // bad idea, race condition on candidates
-                .Select(CheckForLoneCandidates)
+                .Select(i => CheckForLoneCandidates(log, i))
                 .Aggregate(false, (acc, val) => acc || val);
         }
 
-        private bool CheckForLoneCandidates(int value)
+        private bool CheckForLoneCandidates(Action<string> log, int value)
         {
             // check rows
-            bool boardChanged = CheckForLoneCandidates(Rows, value);
+            bool boardChanged = CheckForLoneCandidates(log, Rows, value);
 
             // check columns
-            if (CheckForLoneCandidates(Columns, value)) boardChanged = true;
+            if (CheckForLoneCandidates(log, Columns, value)) boardChanged = true;
 
             // check grids
-            if (CheckForLoneCandidates(Grids, value)) boardChanged = true;
+            if (CheckForLoneCandidates(log, Grids, value)) boardChanged = true;
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Cell[][] cellGrouping, int value)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[][] cellGrouping, int value)
         {
             bool boardChanged = false;
             foreach (Cell[] cell in cellGrouping)
             {
-                if (CheckForLoneCandidates(cell, value)) boardChanged = true;
+                if (CheckForLoneCandidates(log, cell, value)) boardChanged = true;
             }
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Cell[] cells, int value)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[] cells, int value)
         {
             Cell? loneCandidate = null;
             foreach (Cell cell in cells)
@@ -188,34 +253,34 @@ namespace Sudoku
             }
 
             if (loneCandidate == null) return false;
-            Debug.WriteLine($"Lone Candidate: Cell #{loneCandidate.Index} solved to {value}");
+            log($"Lone Candidate: Cell #{loneCandidate.Index} solved to {value}");
             loneCandidate.Solve(value);
             return true;
         }
 
-        public bool CheckForDeadlockedCells()
+        public bool CheckForDeadlockedCells(Action<string> log)
         {
             // check rows
-            bool boardChanged = CheckForDeadlockedCells(Rows);
+            bool boardChanged = CheckForDeadlockedCells(log, Rows);
 
             // check columns
-            if (CheckForDeadlockedCells(Columns)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Columns)) boardChanged = true;
 
             // check grids
-            if (CheckForDeadlockedCells(Grids)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Grids)) boardChanged = true;
 
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Cell[][] cellGrouping)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping)
         {
             return cellGrouping
                 // .AsParallel() // bad idea, race condition on candidates
-                .Select(CheckForDeadlockedCells)
+                .Select(cells => CheckForDeadlockedCells(log, cells))
                 .Aggregate(false, (acc, val) => acc || val);
         }
 
-        private static bool CheckForDeadlockedCells(Cell[] cells)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells)
         {
             bool boardChanged = false;
 
@@ -234,7 +299,7 @@ namespace Sudoku
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
-                Debug.WriteLine($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
+                log($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
                 foreach (Cell cell in cells)
                 {

@@ -1,0 +1,114 @@
+<reactiveUi:ReactiveUserControl x:TypeArguments="viewModels:BoardViewModel"
+                                xmlns="https://github.com/avaloniaui"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:reactiveUi="http://reactiveui.net"
+                                xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                                xmlns:views="clr-namespace:Sudoku.Views"
+                                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                                x:Class="Sudoku.Views.BoardView"
+                                x:DataType="viewModels:BoardViewModel"
+                                Width="500" Height="500">
+    <Design.DataContext>
+        <viewModels:BoardViewModel/>
+    </Design.DataContext>
+
+    <reactiveUi:ReactiveUserControl.DataContext>
+        <viewModels:BoardViewModel/>
+    </reactiveUi:ReactiveUserControl.DataContext>
+
+    <Border>
+        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <Border Grid.Row="0" Grid.Column="0" Name="Border01"> <views:CellView Name="Cell01" /> </Border>
+            <Border Grid.Row="0" Grid.Column="1" Name="Border02"> <views:CellView Name="Cell02" /> </Border>
+            <Border Grid.Row="0" Grid.Column="2" Name="Border03"> <views:CellView Name="Cell03" /> </Border>
+            <Border Grid.Row="0" Grid.Column="3" Name="Border04"> <views:CellView Name="Cell04" /> </Border>
+            <Border Grid.Row="0" Grid.Column="4" Name="Border05"> <views:CellView Name="Cell05" /> </Border>
+            <Border Grid.Row="0" Grid.Column="5" Name="Border06"> <views:CellView Name="Cell06" /> </Border>
+            <Border Grid.Row="0" Grid.Column="6" Name="Border07"> <views:CellView Name="Cell07" /> </Border>
+            <Border Grid.Row="0" Grid.Column="7" Name="Border08"> <views:CellView Name="Cell08" /> </Border>
+            <Border Grid.Row="0" Grid.Column="8" Name="Border09"> <views:CellView Name="Cell09" /> </Border>
+            
+            <Border Grid.Row="1" Grid.Column="0" Name="Border10"> <views:CellView Name="Cell10" /> </Border>
+            <Border Grid.Row="1" Grid.Column="1" Name="Border11"> <views:CellView Name="Cell11" /> </Border>
+            <Border Grid.Row="1" Grid.Column="2" Name="Border12"> <views:CellView Name="Cell12" /> </Border>
+            <Border Grid.Row="1" Grid.Column="3" Name="Border13"> <views:CellView Name="Cell13" /> </Border>
+            <Border Grid.Row="1" Grid.Column="4" Name="Border14"> <views:CellView Name="Cell14" /> </Border>
+            <Border Grid.Row="1" Grid.Column="5" Name="Border15"> <views:CellView Name="Cell15" /> </Border>
+            <Border Grid.Row="1" Grid.Column="6" Name="Border16"> <views:CellView Name="Cell16" /> </Border>
+            <Border Grid.Row="1" Grid.Column="7" Name="Border17"> <views:CellView Name="Cell17" /> </Border>
+            <Border Grid.Row="1" Grid.Column="8" Name="Border18"> <views:CellView Name="Cell18" /> </Border>
+            
+            <Border Grid.Row="2" Grid.Column="0" Name="Border19"> <views:CellView Name="Cell19" /> </Border>
+            <Border Grid.Row="2" Grid.Column="1" Name="Border20"> <views:CellView Name="Cell20" /> </Border>
+            <Border Grid.Row="2" Grid.Column="2" Name="Border21"> <views:CellView Name="Cell21" /> </Border>
+            <Border Grid.Row="2" Grid.Column="3" Name="Border22"> <views:CellView Name="Cell22" /> </Border>
+            <Border Grid.Row="2" Grid.Column="4" Name="Border23"> <views:CellView Name="Cell23" /> </Border>
+            <Border Grid.Row="2" Grid.Column="5" Name="Border24"> <views:CellView Name="Cell24" /> </Border>
+            <Border Grid.Row="2" Grid.Column="6" Name="Border25"> <views:CellView Name="Cell25" /> </Border>
+            <Border Grid.Row="2" Grid.Column="7" Name="Border26"> <views:CellView Name="Cell26" /> </Border>
+            <Border Grid.Row="2" Grid.Column="8" Name="Border27"> <views:CellView Name="Cell27" /> </Border>
+            
+            <Border Grid.Row="3" Grid.Column="0" Name="Border28"> <views:CellView Name="Cell28" /> </Border>
+            <Border Grid.Row="3" Grid.Column="1" Name="Border29"> <views:CellView Name="Cell29" /> </Border>
+            <Border Grid.Row="3" Grid.Column="2" Name="Border30"> <views:CellView Name="Cell30" /> </Border>
+            <Border Grid.Row="3" Grid.Column="3" Name="Border31"> <views:CellView Name="Cell31" /> </Border>
+            <Border Grid.Row="3" Grid.Column="4" Name="Border32"> <views:CellView Name="Cell32" /> </Border>
+            <Border Grid.Row="3" Grid.Column="5" Name="Border33"> <views:CellView Name="Cell33" /> </Border>
+            <Border Grid.Row="3" Grid.Column="6" Name="Border34"> <views:CellView Name="Cell34" /> </Border>
+            <Border Grid.Row="3" Grid.Column="7" Name="Border35"> <views:CellView Name="Cell35" /> </Border>
+            <Border Grid.Row="3" Grid.Column="8" Name="Border36"> <views:CellView Name="Cell36" /> </Border>
+            
+            <Border Grid.Row="4" Grid.Column="0" Name="Border37"> <views:CellView Name="Cell37" /> </Border>
+            <Border Grid.Row="4" Grid.Column="1" Name="Border38"> <views:CellView Name="Cell38" /> </Border>
+            <Border Grid.Row="4" Grid.Column="2" Name="Border39"> <views:CellView Name="Cell39" /> </Border>
+            <Border Grid.Row="4" Grid.Column="3" Name="Border40"> <views:CellView Name="Cell40" /> </Border>
+            <Border Grid.Row="4" Grid.Column="4" Name="Border41"> <views:CellView Name="Cell41" /> </Border>
+            <Border Grid.Row="4" Grid.Column="5" Name="Border42"> <views:CellView Name="Cell42" /> </Border>
+            <Border Grid.Row="4" Grid.Column="6" Name="Border43"> <views:CellView Name="Cell43" /> </Border>
+            <Border Grid.Row="4" Grid.Column="7" Name="Border44"> <views:CellView Name="Cell44" /> </Border>
+            <Border Grid.Row="4" Grid.Column="8" Name="Border45"> <views:CellView Name="Cell45" /> </Border>
+            
+            <Border Grid.Row="5" Grid.Column="0" Name="Border46"> <views:CellView Name="Cell46" /> </Border>
+            <Border Grid.Row="5" Grid.Column="1" Name="Border47"> <views:CellView Name="Cell47" /> </Border>
+            <Border Grid.Row="5" Grid.Column="2" Name="Border48"> <views:CellView Name="Cell48" /> </Border>
+            <Border Grid.Row="5" Grid.Column="3" Name="Border49"> <views:CellView Name="Cell49" /> </Border>
+            <Border Grid.Row="5" Grid.Column="4" Name="Border50"> <views:CellView Name="Cell50" /> </Border>
+            <Border Grid.Row="5" Grid.Column="5" Name="Border51"> <views:CellView Name="Cell51" /> </Border>
+            <Border Grid.Row="5" Grid.Column="6" Name="Border52"> <views:CellView Name="Cell52" /> </Border>
+            <Border Grid.Row="5" Grid.Column="7" Name="Border53"> <views:CellView Name="Cell53" /> </Border>
+            <Border Grid.Row="5" Grid.Column="8" Name="Border54"> <views:CellView Name="Cell54" /> </Border>
+            
+            <Border Grid.Row="6" Grid.Column="0" Name="Border55"> <views:CellView Name="Cell55" /> </Border>
+            <Border Grid.Row="6" Grid.Column="1" Name="Border56"> <views:CellView Name="Cell56" /> </Border>
+            <Border Grid.Row="6" Grid.Column="2" Name="Border57"> <views:CellView Name="Cell57" /> </Border>
+            <Border Grid.Row="6" Grid.Column="3" Name="Border58"> <views:CellView Name="Cell58" /> </Border>
+            <Border Grid.Row="6" Grid.Column="4" Name="Border59"> <views:CellView Name="Cell59" /> </Border>
+            <Border Grid.Row="6" Grid.Column="5" Name="Border60"> <views:CellView Name="Cell60" /> </Border>
+            <Border Grid.Row="6" Grid.Column="6" Name="Border61"> <views:CellView Name="Cell61" /> </Border>
+            <Border Grid.Row="6" Grid.Column="7" Name="Border62"> <views:CellView Name="Cell62" /> </Border>
+            <Border Grid.Row="6" Grid.Column="8" Name="Border63"> <views:CellView Name="Cell63" /> </Border>
+            
+            <Border Grid.Row="7" Grid.Column="0" Name="Border64"> <views:CellView Name="Cell64" /> </Border>
+            <Border Grid.Row="7" Grid.Column="1" Name="Border65"> <views:CellView Name="Cell65" /> </Border>
+            <Border Grid.Row="7" Grid.Column="2" Name="Border66"> <views:CellView Name="Cell66" /> </Border>
+            <Border Grid.Row="7" Grid.Column="3" Name="Border67"> <views:CellView Name="Cell67" /> </Border>
+            <Border Grid.Row="7" Grid.Column="4" Name="Border68"> <views:CellView Name="Cell68" /> </Border>
+            <Border Grid.Row="7" Grid.Column="5" Name="Border69"> <views:CellView Name="Cell69" /> </Border>
+            <Border Grid.Row="7" Grid.Column="6" Name="Border70"> <views:CellView Name="Cell70" /> </Border>
+            <Border Grid.Row="7" Grid.Column="7" Name="Border71"> <views:CellView Name="Cell71" /> </Border>
+            <Border Grid.Row="7" Grid.Column="8" Name="Border72"> <views:CellView Name="Cell72" /> </Border>
+            
+            <Border Grid.Row="8" Grid.Column="0" Name="Border73"> <views:CellView Name="Cell73" /> </Border>
+            <Border Grid.Row="8" Grid.Column="1" Name="Border74"> <views:CellView Name="Cell74" /> </Border>
+            <Border Grid.Row="8" Grid.Column="2" Name="Border75"> <views:CellView Name="Cell75" /> </Border>
+            <Border Grid.Row="8" Grid.Column="3" Name="Border76"> <views:CellView Name="Cell76" /> </Border>
+            <Border Grid.Row="8" Grid.Column="4" Name="Border77"> <views:CellView Name="Cell77" /> </Border>
+            <Border Grid.Row="8" Grid.Column="5" Name="Border78"> <views:CellView Name="Cell78" /> </Border>
+            <Border Grid.Row="8" Grid.Column="6" Name="Border79"> <views:CellView Name="Cell79" /> </Border>
+            <Border Grid.Row="8" Grid.Column="7" Name="Border80"> <views:CellView Name="Cell80" /> </Border>
+            <Border Grid.Row="8" Grid.Column="8" Name="Border81"> <views:CellView Name="Cell81" /> </Border>
+        </Grid>
+    </Border>
+</reactiveUi:ReactiveUserControl>

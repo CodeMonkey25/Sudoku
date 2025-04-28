@@ -1,0 +1,24 @@
+<reactiveUi:ReactiveUserControl x:TypeArguments="viewModels:CellViewModel"
+                                xmlns="https://github.com/avaloniaui"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:reactiveUi="http://reactiveui.net"
+                                xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                                x:Class="Sudoku.Views.CellView"
+                                x:DataType="viewModels:CellViewModel"
+                                Width="50" Height="50">
+    <Design.DataContext>
+        <viewModels:CellViewModel/>
+    </Design.DataContext>
+
+    <reactiveUi:ReactiveUserControl.DataContext>
+        <viewModels:CellViewModel/>
+    </reactiveUi:ReactiveUserControl.DataContext>
+    
+    <Grid ColumnDefinitions="*" RowDefinitions="*" Background="Transparent" PointerPressed="InputElement_OnPointerPressed">
+        <TextBlock FontSize="10" Text="{Binding Notes}" TextWrapping="Wrap" IsVisible="{Binding IsNotesVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" Text="{Binding Value}" Foreground="{Binding ValueBrush}" IsVisible="{Binding IsValueVisible}" />
+    </Grid>
+</reactiveUi:ReactiveUserControl>

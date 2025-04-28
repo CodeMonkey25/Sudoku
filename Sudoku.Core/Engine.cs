@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudoku
 {
-    public static class Engine
+    public class Engine
     {
-        public static int[] Solve(int[] puzzle)
+        private Action<string> _log;
+
+        public Engine(Action<string> log)
+        {
+            _log = log;
+        }
+
+        public int[] Solve(int[] puzzle)
         {
             using Board board = new();
             
@@ -20,40 +27,40 @@ namespace Sudoku
             {
                 string divider = new('*', 40);
 
-                Debug.WriteLine(divider);
-                Debug.WriteLine(">>>>> Unable to find solution! <<<<<");
-                Debug.WriteLine(divider);
+                _log(divider);
+                _log(">>>>> Unable to find solution! <<<<<");
+                _log(divider);
             }
             else if (board.IsSolutionValid())
             {
-                Debug.WriteLine(string.Empty);
-                Debug.WriteLine("Solution found! :-)");
+                _log(string.Empty);
+                _log("Solution found! :-)");
             }
             else
             {
-                Debug.WriteLine(string.Empty);
-                Debug.WriteLine("Invalid solution found! :-(");
+                _log(string.Empty);
+                _log("Invalid solution found! :-(");
             }
-            Debug.WriteLine($"Number of guesses: {guesses}");
+            _log($"Number of guesses: {guesses}");
 
-            Debug.WriteLine(string.Empty);
+            _log(string.Empty);
             return board.GetSolution();
         }
 
-        private static void PrintCandidates(Board board, string message)
+        private void PrintCandidates(Board board, string message)
         {
             string debugSpacer = new('*', 40);
             
-            Debug.WriteLine(string.Empty);
-            Debug.WriteLine(debugSpacer);
-            Debug.WriteLine(string.Empty);
-            Debug.WriteLine(message);
-            Debug.WriteLine(board.CandidatesListing());
-            Debug.WriteLine(debugSpacer);
-            Debug.WriteLine(string.Empty);
+            _log(string.Empty);
+            _log(debugSpacer);
+            _log(string.Empty);
+            _log(message);
+            _log(board.CandidatesListing());
+            _log(debugSpacer);
+            _log(string.Empty);
         }
 
-        private static bool _solveLoop(Board board, ref int guesses)
+        private bool _solveLoop(Board board, ref int guesses)
         {
             // try to solve the puzzle logically
             if (_solveLogically(board)) return true;
@@ -66,23 +73,23 @@ namespace Sudoku
                 guesses++;
                 try
                 {
-                    Debug.WriteLine($"Guessing {value} for cell #{cell.Index}");
+                    _log($"Guessing {value} for cell #{cell.Index}");
                     cell.Solve(value);
                     if (_solveLoop(board, ref guesses)) return true;
                 }
                 catch
                 {
-                    Debug.WriteLine("Failed to solve - Guess was bad! :-(");
+                    _log("Failed to solve - Guess was bad! :-(");
                 }
 
-                Debug.WriteLine($"Reverting guess {value} for cell #{cell.Index}");
+                _log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(state);
                 guesses--;
             }
             return board.IsSolved();
         }
 
-        private static bool _solveLogically(Board board)
+        private bool _solveLogically(Board board)
         {
             // the cells are bound to one another when the board is created
             // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
@@ -100,10 +107,10 @@ namespace Sudoku
                 
                 // check for cells with the only value for a row/col/grid
                 // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
-                boardChanged = boardChanged || board.CheckForLoneCandidates();
+                boardChanged = boardChanged || board.CheckForLoneCandidates(_log);
                 
                 // check for deadlocks
-                boardChanged = boardChanged || board.CheckForDeadlockedCells();
+                boardChanged = boardChanged || board.CheckForDeadlockedCells(_log);
 
                 PrintCandidates(board, "Board State");
                 if (!boardChanged) break;

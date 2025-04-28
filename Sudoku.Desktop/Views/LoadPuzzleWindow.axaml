@@ -1,0 +1,23 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:LoadPuzzleWindowViewModel"
+                           xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                           mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="240"
+                           x:Class="Sudoku.Views.LoadPuzzleWindow"
+                           Title="Load Puzzle"
+                           Height="240" Width="200"
+                           x:DataType="viewModels:LoadPuzzleWindowViewModel">
+    <Design.DataContext>
+        <viewModels:LoadPuzzleWindowViewModel/>
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,Auto,Auto" Margin="5">
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0">Puzzle text:</TextBlock>
+        <TextBox Name="PuzzleTextBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0 5" FontFamily="Consolas" Text="{Binding PuzzleText}" TextWrapping="Wrap" AttachedToVisualTree="PuzzleTextBox_OnAttachedToVisualTree" />
+        <Button Name="OpenButton" Grid.Row="2" Grid.Column="1" Margin="5 0" IsDefault="True" Click="OpenButton_OnClick">Open</Button>
+        <Button Name="CancelButton" Grid.Row="2" Grid.Column="2" IsCancel="True" Click="CancelButton_OnClick">Cancel</Button>
+    </Grid>
+</reactiveUi:ReactiveWindow>
