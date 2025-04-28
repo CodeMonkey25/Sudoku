@@ -25,6 +25,8 @@
                 <MenuItem Header="_Exit" InputGesture="Ctrl + X" HotKey="CTRL+x" Command="{Binding $parent[views:MainWindow].ExitCommand}" />
             </MenuItem>
             <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" InputGesture="Ctrl + Z" HotKey="CTRL+z" Command="{Binding $parent[views:MainWindow].UndoCommand}" />
+                <Separator/>
                 <MenuItem Header="Copy" IsEnabled="False" />
                 <MenuItem Header="Paste" IsEnabled="False" />
             </MenuItem>

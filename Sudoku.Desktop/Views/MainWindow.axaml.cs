@@ -30,6 +30,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         get => _exitCommand;
         set => SetAndRaise(ExitCommandProperty, ref _exitCommand, value);
     }
+
+    public static readonly DirectProperty<MainWindow, ICommand> UndoCommandProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(UndoCommand), o => o.UndoCommand, (o, v) => o.UndoCommand = v);
+    private ICommand _undoCommand = NullCommand.Instance;
+    public ICommand UndoCommand
+    {
+        get => _undoCommand;
+        set => SetAndRaise(UndoCommandProperty, ref _undoCommand, value);
+    }
     
     public static readonly DirectProperty<MainWindow, ICommand> RunSolverProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(RunSolverCommand), static o => o.RunSolverCommand, static (o, v) => o.RunSolverCommand = v);
     private ICommand _runSolverCommand = NullCommand.Instance;
@@ -45,19 +53,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         
         LoadPuzzleCommand = ReactiveCommand.Create(LoadPuzzle);
         ExitCommand = ReactiveCommand.Create(Exit);
+        UndoCommand = ReactiveCommand.Create(Undo);
         RunSolverCommand = ReactiveCommand.Create(RunSolver);
         
-        // Board.ViewModel = Locator.Current.GetService<BoardViewModel>();
+        Board.ViewModel = Locator.Current.GetService<BoardViewModel>();
 
         this.WhenActivated(disposables =>
         {
-            Observable.Interval(TimeSpan.FromSeconds(1))
+            Observable.Interval(TimeSpan.FromSeconds(0.5))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => Board.Tick())
                 .DisposeWith(disposables);
         });
     }
-    
+
     private async Task LoadPuzzle()
     {
         if (ViewModel is null) return;
@@ -74,6 +83,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private void Exit()
     {
         Close();
+    }
+
+    private void Undo()
+    {
+        Board.Undo();
     }
 
     private async Task RunSolver()

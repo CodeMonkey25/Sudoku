@@ -13,6 +13,8 @@ namespace Sudoku.Views;
 
 public partial class BoardView : ReactiveUserControl<BoardViewModel>
 {
+    private readonly CellView[] _cellViews = new CellView[81];
+    
     public BoardView()
     {
         InitializeComponent();
@@ -20,10 +22,10 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
         foreach (int i in Enumerable.Range(0, 81))
         {
             Border cellBorder = this.FindControl<Border>($"Border{i+1:00}") ?? throw new Exception($"Border{i+1:00} not found");
-            CellView cellView = this.FindControl<CellView>($"Cell{i+1:00}") ?? throw new Exception($"Cell{i+1:00} not found");
-            cellView.ViewModel = Locator.Current.GetService<CellViewModel>();
-            cellView.ViewModel!.Cell = ViewModel!.Board.Cells[i];
-
+            _cellViews[i] = this.FindControl<CellView>($"Cell{i+1:00}") ?? throw new Exception($"Cell{i+1:00} not found");
+            _cellViews[i].ViewModel = Locator.Current.GetService<CellViewModel>();
+            _cellViews[i].ViewModel!.Cell = ViewModel!.Board.Cells[i];
+            
             double left = 0, top = 0, right = 0, bottom = 0;
             
             // add the single border around each cell 
@@ -46,35 +48,46 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
             this.WhenAnyValue(x => x.ViewModel)
                 .Subscribe(vm =>
                 {
-                    foreach (int i in Enumerable.Range(0, 81))
+                    foreach (CellView cellView in _cellViews)
                     {
-                        CellView? cellView = this.FindControl<CellView>($"Cell{i+1:00}");
-                        if (cellView is null) continue;
+                        ViewModel!.StoreCellViewModel(cellView.ViewModel!);
+                        int i = cellView.ViewModel!.Cell.Index;
                         cellView.ViewModel!.Cell = vm!.Board.Cells[i];
                     }
                 })
                 .DisposeWith(disposables);
+            
+            Disposable.Create(() => Array.Fill(_cellViews, null)).DisposeWith(disposables);
         });
     }
 
     public void LoadPuzzle(string puzzleText)
     {
-        if (ViewModel is null) return;
-        ViewModel.LoadPuzzle(puzzleText);
+        ViewModel?.LoadPuzzle(puzzleText);
     }
 
     public string GetPuzzle()
     {
-        if (ViewModel is null) return string.Empty;
-        return ViewModel.GetPuzzle();
+        return ViewModel?.GetPuzzle() ?? string.Empty;
     }
 
     public void Tick()
     {
-        foreach (int i in Enumerable.Range(0, 81))
+        if (ViewModel is null) return;
+        if (!ViewModel.IsDirty) return;
+
+        ViewModel.Tick();
+        foreach (CellView cellView in _cellViews)
         {
-            CellView cellView = this.FindControl<CellView>($"Cell{i+1:00}") ?? throw new Exception($"Cell{i+1:00} not found");
             cellView.Tick();
         }
+
+        ViewModel.IsDirty = false;
+    }
+
+    public void Undo()
+    {
+        if (ViewModel is null) return;
+        ViewModel.Undo();
     }
 }
