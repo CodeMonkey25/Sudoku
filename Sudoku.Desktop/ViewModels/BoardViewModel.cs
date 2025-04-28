@@ -6,13 +6,12 @@ namespace Sudoku.ViewModels;
 
 public class BoardViewModel : ViewModelBase
 {
-    private CellViewModel?[] CellViewModels { get; set; } = new CellViewModel[81];
-    private Stack<HashSet<int>[]> UndoStack { get; set; } = new();
+    private CellViewModel?[] CellViewModels { get; } = new CellViewModel[81];
+    private Stack<HashSet<int>[]> UndoStack { get; } = new();
     
-    public Board Board { get; set; } = new();
+    public Board Board { get; } = new();
     public bool IsDirty { get; set; } = true;
     
-
     protected override void HandleActivation(CompositeDisposable disposables)
     {
         base.HandleActivation(disposables);
@@ -67,7 +66,6 @@ public class BoardViewModel : ViewModelBase
 
     private void CellIsSolving(object? sender, EventArgs e)
     {
-        // push board state onto undo stack 
         UndoStack.Push(Board.GetState());
     }
 
