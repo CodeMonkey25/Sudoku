@@ -69,4 +69,10 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
 
         return 0;
     }
+
+    public void SetGiven()
+    {
+        if (ViewModel is null) return;
+        ViewModel.Cell.IsGiven = ViewModel.Cell.IsSolved;
+    }
 }

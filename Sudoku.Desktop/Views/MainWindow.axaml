@@ -31,6 +31,7 @@
                 <MenuItem Header="Paste" IsEnabled="False" />
             </MenuItem>
             <MenuItem Header="_Solver">
+                <MenuItem Header="Set _Given" InputGesture="Ctrl + G" HotKey="CTRL+g" Command="{Binding $parent[views:MainWindow].SetGivenCommand}" />
                 <MenuItem Header="Run Solver..." Command="{Binding $parent[views:MainWindow].RunSolverCommand}" />
             </MenuItem>
         </Menu>

@@ -92,6 +92,7 @@ namespace Sudoku
             Candidates.Clear();
             Candidates.UnionWith([1, 2, 3, 4, 5, 6, 7, 8, 9]);
             IsSolved = false;
+            IsGiven = false;
         }
         
         public HashSet<int> GetState()
