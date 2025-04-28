@@ -74,7 +74,7 @@ namespace Sudoku.Extensions;
                   Content = buttonType.ToString(), 
                   IsDefault = buttonType == DialogButtonType.Ok, 
                   IsCancel = buttonType == DialogButtonType.Cancel,
-                  Command = ReactiveCommand.Create(() => dialog.Close()),
+                  Command = ReactiveCommand.Create(() => dialog.Close((int)buttonType)),
                }
             );
          }

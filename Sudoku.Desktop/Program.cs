@@ -32,7 +32,6 @@ sealed class Program
     {
         SplatRegistrations.Register<IViewFactory, ViewFactory>();
         SplatRegistrations.Register<MainWindowViewModel>();
-        SplatRegistrations.Register<LoadPuzzleWindowViewModel>();
         SplatRegistrations.Register<SolverWindowViewModel>();
         SplatRegistrations.Register<BoardViewModel>();
         SplatRegistrations.Register<CellViewModel>();

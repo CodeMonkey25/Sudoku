@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using Splat;
+using Sudoku.Extensions;
 using Sudoku.Services;
 using Sudoku.Utility;
 using Sudoku.ViewModels;
@@ -70,13 +71,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private async Task LoadPuzzle()
     {
         if (ViewModel is null) return;
-        IViewFactory? viewFactory = Locator.Current.GetService<IViewFactory>();
-        if (viewFactory is null) return;
+
+        string puzzle = """
+                        037 000 090
+                        050 930 012
+                        000 000 000
+                        000 100 900
+                        800 274 003
+                        003 005 000
+                        000 000 000
+                        370 062 080
+                        060 000 150
+                        """;
+        string? result = await this.ShowInputBox("Please enter a puzzle:", puzzle);
         
-        LoadPuzzleWindow dialog = new() { DataContext = viewFactory.CreateView<LoadPuzzleWindowViewModel>() };
-        string? result = await dialog.ShowDialog<string?>(this);
         if (string.IsNullOrWhiteSpace(result)) return;
-        
         Board.LoadPuzzle(result);
     }
 
