@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using Splat;
@@ -40,7 +39,7 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
             if((i / 9) % 3 == 2) bottom = 2;
             
             cellBorder.BorderThickness = new Thickness(left, top, right, bottom);
-            cellBorder.BorderBrush = Brushes.Black;
+            cellBorder[!Border.BorderBrushProperty] = this[!UserControl.ForegroundProperty];
         }
 
         this.WhenActivated(disposables =>

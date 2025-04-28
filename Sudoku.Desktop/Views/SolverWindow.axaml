@@ -16,6 +16,6 @@
     </Design.DataContext>
     
     <ScrollViewer>
-        <TextBox Margin="5" Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" />
+        <TextBox Margin="5" Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Courier" />
     </ScrollViewer>
 </reactiveUi:ReactiveWindow>
