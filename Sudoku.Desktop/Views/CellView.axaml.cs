@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Avalonia.VisualTree;
 using ReactiveUI;
@@ -23,16 +24,27 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
         get => _solveCellCommand;
         set => SetAndRaise(SolveCellCommandProperty, ref _solveCellCommand, value);
     }
+
+    public static readonly DirectProperty<CellView, IBrush?> ValueBrushProperty = AvaloniaProperty.RegisterDirect<CellView, IBrush?>(nameof(ValueBrush), o => o.ValueBrush, (o, v) => o.ValueBrush = v);
+    private IBrush? _valueBrush;
+    public IBrush? ValueBrush
+    {
+        get => _valueBrush;
+        set => SetAndRaise(ValueBrushProperty, ref _valueBrush, value);
+    }
     
     public CellView()
     {
         InitializeComponent();
         SolveCellCommand = ReactiveCommand.Create<int, Task<int>>(SolveCell);
+        ValueBrush = this.Foreground;
     }
 
     public void Tick()
     {
-        ViewModel?.Tick();
+        if (ViewModel is null) return;
+        ValueBrush = ViewModel.Cell.IsGiven ? Brushes.Green : this.Foreground;
+        ViewModel.Tick();
     }
 
     private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)

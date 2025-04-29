@@ -5,6 +5,7 @@
                                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                                 xmlns:reactiveUi="http://reactiveui.net"
                                 xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                                xmlns:views="clr-namespace:Sudoku.Views"
                                 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                                 x:Class="Sudoku.Views.CellView"
                                 x:DataType="viewModels:CellViewModel"
@@ -19,6 +20,6 @@
     
     <Grid ColumnDefinitions="*" RowDefinitions="*" Background="Transparent" PointerPressed="InputElement_OnPointerPressed">
         <TextBlock FontSize="10" Text="{Binding Notes}" TextWrapping="Wrap" IsVisible="{Binding IsNotesVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" Text="{Binding Value}" Foreground="{Binding ValueBrush}" IsVisible="{Binding IsValueVisible}" />
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" Text="{Binding Value}" Foreground="{Binding $parent[views:CellView].ValueBrush}" IsVisible="{Binding IsValueVisible}" />
     </Grid>
 </reactiveUi:ReactiveUserControl>

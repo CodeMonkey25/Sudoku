@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reactive;
 using System.Windows.Input;
-using Avalonia.Media;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Sudoku.Utility;
@@ -15,7 +14,6 @@ public partial class CellViewModel : ViewModelBase
     [Reactive] private ICommand? _solveValueCommand = NullCommand.Instance;
     
     public string Value => Cell.Value == 0 ? " " : Cell.Value.ToString();
-    public IBrush ValueBrush => Cell.IsGiven ? Brushes.Green : Brushes.Black;
     public string Notes => Cell.IsSolved ? string.Empty : string.Join(" ", Cell.Candidates.Order());
     public bool IsValueVisible => Cell.IsSolved;
     public bool IsNotesVisible => !Cell.IsSolved;
@@ -31,7 +29,6 @@ public partial class CellViewModel : ViewModelBase
     public void Tick()
     {
         this.RaisePropertyChanged(nameof(Value));
-        this.RaisePropertyChanged(nameof(ValueBrush));
         this.RaisePropertyChanged(nameof(Notes));
         this.RaisePropertyChanged(nameof(IsValueVisible));
         this.RaisePropertyChanged(nameof(IsNotesVisible));
