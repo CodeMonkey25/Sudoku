@@ -20,7 +20,8 @@
     <Grid ColumnDefinitions="*" RowDefinitions="Auto,*">
         <Menu Grid.Row="0" Grid.Column="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Load Puzzle..." InputGesture="Ctrl + L" HotKey="CTRL+l" Command="{Binding $parent[views:MainWindow].LoadPuzzleCommand}" />
+                <MenuItem Header="_Library..." InputGesture="Ctrl + L" HotKey="CTRL+l" Command="{Binding $parent[views:MainWindow].LibraryCommand}" />
+                <MenuItem Header="Load _Puzzle..." InputGesture="Ctrl + P" HotKey="CTRL+p" Command="{Binding $parent[views:MainWindow].LoadPuzzleCommand}" />
                 <Separator/>
                 <MenuItem Header="_Exit" InputGesture="Ctrl + X" HotKey="CTRL+x" Command="{Binding $parent[views:MainWindow].ExitCommand}" />
             </MenuItem>

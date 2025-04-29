@@ -35,6 +35,7 @@ sealed class Program
         SplatRegistrations.Register<SolverWindowViewModel>();
         SplatRegistrations.Register<BoardViewModel>();
         SplatRegistrations.Register<CellViewModel>();
+        SplatRegistrations.Register<LibraryViewModel>();
         
         SplatRegistrations.SetupIOC();
     }

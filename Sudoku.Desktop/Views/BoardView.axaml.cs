@@ -65,6 +65,12 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
         ViewModel?.LoadPuzzle(puzzleText);
     }
 
+    public void LoadPuzzle(string level, string number)
+    {
+        string puzzleText = (string?) typeof(Puzzles).GetField($"L{level}N{number}")?.GetValue(null) ?? string.Empty;
+        ViewModel?.LoadPuzzle(puzzleText);
+    }
+
     public string GetPuzzle()
     {
         return ViewModel?.GetPuzzle() ?? string.Empty;

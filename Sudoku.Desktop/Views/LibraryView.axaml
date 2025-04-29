@@ -1,0 +1,22 @@
+<reactiveUi:ReactiveUserControl x:TypeArguments="viewModels:LibraryViewModel"
+                                xmlns="https://github.com/avaloniaui"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:reactiveUi="http://reactiveui.net"
+                                xmlns:viewModels="clr-namespace:Sudoku.ViewModels"
+                                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                                x:Class="Sudoku.Views.LibraryView"
+                                x:DataType="viewModels:LibraryViewModel">
+    <Design.DataContext>
+        <viewModels:LibraryViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="Auto,*,Auto,Auto">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Level:" />
+        <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding Levels}" SelectedItem="{Binding Level}" SelectionChanged="SelectingItemsControl_OnSelectionChanged" />
+        
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Number:" />
+        <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding Numbers}" SelectedItem="{Binding Number}" />
+    </Grid>
+</reactiveUi:ReactiveUserControl>

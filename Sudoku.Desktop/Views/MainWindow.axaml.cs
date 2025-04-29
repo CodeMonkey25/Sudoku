@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using Splat;
+using Sudoku.Enumerations;
 using Sudoku.Extensions;
 using Sudoku.Services;
 using Sudoku.Utility;
@@ -16,6 +17,14 @@ namespace Sudoku.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
+    public static readonly DirectProperty<MainWindow, ICommand> LibraryCommandProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(LibraryCommand), o => o.LibraryCommand, (o, v) => o.LibraryCommand = v);
+    private ICommand _libraryCommand = NullCommand.Instance;
+    public ICommand LibraryCommand
+    {
+        get => _libraryCommand;
+        set => SetAndRaise(LibraryCommandProperty, ref _libraryCommand, value);
+    }
+    
     public static readonly DirectProperty<MainWindow, ICommand> LoadCommandProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(LoadPuzzleCommand), static o => o.LoadPuzzleCommand, static (o, v) => o.LoadPuzzleCommand = v);
     private ICommand _loadPuzzleCommand = NullCommand.Instance;
     public ICommand LoadPuzzleCommand
@@ -60,6 +69,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         InitializeComponent();
         
+        LibraryCommand = ReactiveCommand.Create(LoadFromLibrary);
         LoadPuzzleCommand = ReactiveCommand.Create(LoadPuzzle);
         ExitCommand = ReactiveCommand.Create(Exit);
         UndoCommand = ReactiveCommand.Create(Undo);
@@ -74,6 +84,26 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 .Subscribe(_ => Board.Tick())
                 .DisposeWith(disposables);
         });
+    }
+
+    private async Task LoadFromLibrary()
+    {
+        if (ViewModel is null) return;
+        
+        IViewFactory? viewFactory = Locator.Current.GetService<IViewFactory>();
+        if (viewFactory is null) return;
+        
+        LibraryView dialog = new() { DataContext = viewFactory.CreateView<LibraryViewModel>() };
+        bool result = await this.ShowDialog(dialog, DialogButtonType.Ok | DialogButtonType.Cancel);
+        if (!result) return;
+
+        string level = dialog.ViewModel!.Level;
+        if (string.IsNullOrEmpty(level)) return;
+        
+        string number = dialog.ViewModel!.Number;
+        if (string.IsNullOrEmpty(number)) return;
+        
+        Board.LoadPuzzle(level, number);
     }
 
     private async Task LoadPuzzle()

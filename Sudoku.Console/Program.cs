@@ -9,7 +9,7 @@ namespace Sudoku
         private static void Main()
         {
             // const string puzzleText = "4,,,,9,,,8,,,,,5,,,7,,,6,2,3,7,,,,4,,,4,9,,,,,7,3,,,,,,,,,,7,6,,,,,9,2,,,3,,,,2,4,1,5,,,2,,,6,,,,,1,,,5,,,,7";
-            const string puzzleText = Puzzles.L3N126;
+            const string puzzleText = Puzzles.L3N128;
             int[] puzzle = Board.ParsePuzzle(puzzleText);
 
             Engine engine = new(Console.WriteLine);
