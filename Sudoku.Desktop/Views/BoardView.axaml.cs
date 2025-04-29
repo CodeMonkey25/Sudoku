@@ -89,14 +89,4 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
         if (ViewModel is null) return;
         ViewModel.Undo();
     }
-
-    public void SetGiven()
-    {
-        if (ViewModel is null) return;
-        foreach (CellView cellView in _cellViews)
-        {
-            cellView.SetGiven();
-        }
-        ViewModel.IsDirty = true;
-    }
 }

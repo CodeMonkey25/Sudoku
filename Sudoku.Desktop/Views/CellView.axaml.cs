@@ -55,9 +55,16 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
 
     private async Task<int> SolveCell(int value)
     {
+        if (TopLevel.GetTopLevel(this) is not MainWindow window) return 0;
+        if (ViewModel?.SolveValueCommand is null) return 0;
+        
         try
         {
-            ViewModel?.SolveValueCommand?.Execute(value);
+            ViewModel.SolveValueCommand.Execute(value);
+            if (window.IsInputGiven)
+            {
+                ViewModel.Cell.IsGiven = true;
+            }
         }
         catch
         {
@@ -68,11 +75,5 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
         }
 
         return 0;
-    }
-
-    public void SetGiven()
-    {
-        if (ViewModel is null) return;
-        ViewModel.Cell.IsGiven = ViewModel.Cell.IsSolved;
     }
 }

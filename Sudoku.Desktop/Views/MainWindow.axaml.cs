@@ -40,12 +40,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         set => SetAndRaise(UndoCommandProperty, ref _undoCommand, value);
     }
 
-    public static readonly DirectProperty<MainWindow, ICommand> SetGivenCommandProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(SetGivenCommand), o => o.SetGivenCommand, (o, v) => o.SetGivenCommand = v);
-    private ICommand _setGivenCommand = NullCommand.Instance;
-    public ICommand SetGivenCommand
+    public static readonly DirectProperty<MainWindow, bool> IsInputGivenProperty = AvaloniaProperty.RegisterDirect<MainWindow, bool>(nameof(IsInputGiven), o => o.IsInputGiven, (o, v) => o.IsInputGiven = v);
+    private bool _isInputGiven;
+    public bool IsInputGiven
     {
-        get => _setGivenCommand;
-        set => SetAndRaise(SetGivenCommandProperty, ref _setGivenCommand, value);
+        get => _isInputGiven;
+        set => SetAndRaise(IsInputGivenProperty, ref _isInputGiven, value);
     }
     
     public static readonly DirectProperty<MainWindow, ICommand> RunSolverProperty = AvaloniaProperty.RegisterDirect<MainWindow, ICommand>(nameof(RunSolverCommand), static o => o.RunSolverCommand, static (o, v) => o.RunSolverCommand = v);
@@ -63,7 +63,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         LoadPuzzleCommand = ReactiveCommand.Create(LoadPuzzle);
         ExitCommand = ReactiveCommand.Create(Exit);
         UndoCommand = ReactiveCommand.Create(Undo);
-        SetGivenCommand = ReactiveCommand.Create(SetGiven);
         RunSolverCommand = ReactiveCommand.Create(RunSolver);
         
         Board.ViewModel = Locator.Current.GetService<BoardViewModel>();
@@ -106,11 +105,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private void Undo()
     {
         Board.Undo();
-    }
-
-    private void SetGiven()
-    {
-        Board.SetGiven();
     }
 
     private async Task RunSolver()
