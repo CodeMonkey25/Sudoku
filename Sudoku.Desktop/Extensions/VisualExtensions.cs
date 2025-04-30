@@ -10,13 +10,13 @@ namespace Sudoku.Extensions;
 
    public static class VisualExtensions
    {
-      public static async Task<bool> ShowMessageBox(this Visual visual, string message)
+      public static async Task<bool> ShowMessageBox(this Visual visual, string message, Action<Window>? preShowAction = null)
       {
          Label label = new() { Content = message };
-         return await visual.ShowDialog(label, DialogButtonType.Ok);
+         return await visual.ShowDialog(label, DialogButtonType.Ok, preShowAction);
       }
 
-      public static async Task<string?> ShowInputBox(this Visual visual, string prompt, string defaultValue = "")
+      public static async Task<string?> ShowInputBox(this Visual visual, string prompt, string defaultValue = "", Action<Window>? preShowAction = null)
       {
          Label label = new() { Content = prompt };
          TextBox textBox = new() { Text = defaultValue, };
@@ -24,11 +24,11 @@ namespace Sudoku.Extensions;
          panel.Children.Add(label);
          panel.Children.Add(textBox);
 
-         bool result = await visual.ShowDialog(panel, DialogButtonType.Ok | DialogButtonType.Cancel);
+         bool result = await visual.ShowDialog(panel, DialogButtonType.Ok | DialogButtonType.Cancel, preShowAction);
          return result ? textBox.Text : null;
       }
 
-      public static async Task<bool> ShowDialog(this Visual visual, Control content, DialogButtonType buttonTypes)
+      public static async Task<bool> ShowDialog(this Visual visual, Control content, DialogButtonType buttonTypes, Action<Window>? preShowAction = null)
       {
          Window? window = TopLevel.GetTopLevel(visual) as Window;
          if (window == null)
@@ -78,6 +78,17 @@ namespace Sudoku.Extensions;
                }
             );
          }
+
+         try
+         {
+            preShowAction?.Invoke(dialog);
+         }
+         catch (Exception e)
+         {
+            Console.WriteLine(e);
+            throw;
+         }
+         
          int result = await dialog.ShowDialog<int>(window);
          return (DialogButtonType)result == DialogButtonType.Ok;
       }

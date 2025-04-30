@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using Splat;
@@ -121,7 +124,16 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                         370 062 080
                         060 000 150
                         """;
-        string? result = await this.ShowInputBox("Please enter a puzzle:", puzzle);
+        string? result = await this.ShowInputBox(
+            "Please enter a puzzle:", 
+            puzzle,
+            dialog =>
+            {
+                dialog.Title = "Load Puzzle";
+                TextBox? textBox = dialog.GetLogicalDescendants().OfType<TextBox>().FirstOrDefault();
+                if(textBox is not null)
+                    textBox[!FontFamilyProperty] = Application.Current?.Resources.GetResourceObservable("JetBrainsMono").ToBinding() ?? throw new Exception("Unable to load font resource");
+            });
         
         if (string.IsNullOrWhiteSpace(result)) return;
         Board.LoadPuzzle(result);
