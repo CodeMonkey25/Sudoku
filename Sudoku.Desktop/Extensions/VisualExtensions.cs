@@ -42,9 +42,8 @@ namespace Sudoku.Extensions;
          mainPanel.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Star));
          mainPanel.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
 
-         Window dialog = new Window()
+         Window dialog = new()
          {
-            // Title = "",
             Width = double.NaN,
             Height = double.NaN,
             SizeToContent = SizeToContent.WidthAndHeight,
@@ -75,6 +74,7 @@ namespace Sudoku.Extensions;
                   IsDefault = buttonType == DialogButtonType.Ok, 
                   IsCancel = buttonType == DialogButtonType.Cancel,
                   Command = ReactiveCommand.Create(() => dialog.Close((int)buttonType)),
+                  Margin = new Thickness(0, 0, 5, 5),
                }
             );
          }
