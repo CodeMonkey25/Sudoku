@@ -11,12 +11,12 @@ namespace Sudoku.ViewModels;
 public partial class SolverWindowViewModel : ViewModelBase
 {
     [Reactive] private string _logText = string.Empty;
-    private string PuzzleText { get; set; } = string.Empty;
+    // private string PuzzleText { get; set; } = string.Empty;
     private int[] Puzzle { get; set; } = [];
 
     public void SolvePuzzle(string puzzleText)
     {
-        PuzzleText = puzzleText;
+        // PuzzleText = puzzleText;
         Puzzle = Board.ParsePuzzle(puzzleText);
         
         Task.Run(RunSolver);

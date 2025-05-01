@@ -25,13 +25,11 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
             _cellViews[i].ViewModel = Locator.Current.GetService<CellViewModel>();
             _cellViews[i].ViewModel!.Cell = ViewModel!.Board.Cells[i];
             
-            double left = 0, top = 0, right = 0, bottom = 0;
+            double left = 0, top = 0, right = 1, bottom = 1;
             
             // add the single border around each cell 
             if (i % 9 == 0) left = 1;
             if(i < 9) top = 2;
-            bottom = 1;
-            right = 1;
             
             // double the thickness around each 3x3 grid
             if (i % 3 == 0) left = 2;

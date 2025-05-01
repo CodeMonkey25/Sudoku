@@ -157,7 +157,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         
         SolverWindow dialog = new() { DataContext = viewFactory.CreateView<SolverWindowViewModel>() };
         dialog.ViewModel?.SolvePuzzle(Board.GetPuzzle());
-        string? result = await dialog.ShowDialog<string?>(this);
+        string? _ = await dialog.ShowDialog<string?>(this);
         
         // vm.LoadPuzzle(result);
     }
