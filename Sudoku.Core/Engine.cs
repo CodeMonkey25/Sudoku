@@ -68,7 +68,7 @@ namespace Sudoku
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
             foreach (int value in cell.Candidates.ToArray())
             {
-                CellState[] state = board.GetState();
+                BoardState state = board.GetState();
                 guesses++;
                 try
                 {

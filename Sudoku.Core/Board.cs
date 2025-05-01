@@ -84,21 +84,24 @@ namespace Sudoku
             return Cells.Select(static cell => cell.Value).ToArray();
         }
 
-        public CellState[] GetState()
+        public BoardState GetState()
         {
-            return Cells.Select(static cell => cell.GetState()).ToArray();
+            return new BoardState()
+            {
+                CellStates = Cells.Select(static cell => cell.GetState()).ToArray(),
+            };
         }
         
-        public void RestoreState(CellState[] state)
+        public void RestoreState(BoardState state)
         {
             foreach (Cell cell in Cells)
             {
                 cell.Reset();
             }
 
-            for (int i = 0; i < state.Length; i++)
+            for (int i = 0; i < state.CellStates.Length; i++)
             {
-                CellState cellState = state[i];
+                CellState cellState = state.CellStates[i];
                 Cells[i].SetState(cellState);
             }
         }
