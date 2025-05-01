@@ -84,12 +84,12 @@ namespace Sudoku
             return Cells.Select(static cell => cell.Value).ToArray();
         }
 
-        public HashSet<int>[] GetState()
+        public CellState[] GetState()
         {
             return Cells.Select(static cell => cell.GetState()).ToArray();
         }
         
-        public void RestoreState(HashSet<int>[] state)
+        public void RestoreState(CellState[] state)
         {
             foreach (Cell cell in Cells)
             {
@@ -98,7 +98,7 @@ namespace Sudoku
 
             for (int i = 0; i < state.Length; i++)
             {
-                HashSet<int> cellState = state[i];
+                CellState cellState = state[i];
                 Cells[i].SetState(cellState);
             }
         }

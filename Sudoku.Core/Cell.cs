@@ -95,20 +95,25 @@ namespace Sudoku
             IsGiven = false;
         }
         
-        public HashSet<int> GetState()
+        public CellState GetState()
         {
-            return Candidates.ToHashSet();
+            return new CellState()
+            {
+                Candidates = Candidates.ToHashSet(),
+                IsGiven = IsGiven,
+            };
         }
 
-        public void SetState(HashSet<int> state)
+        public void SetState(CellState state)
         {
             Candidates.Clear();
-            Candidates.UnionWith(state);
+            Candidates.UnionWith(state.Candidates);
             if (Candidates.Count == 1)
             {
                 IsSolved = true;
                 Value = Candidates.First();
             }
+            IsGiven = state.IsGiven;
         }
     }
 }

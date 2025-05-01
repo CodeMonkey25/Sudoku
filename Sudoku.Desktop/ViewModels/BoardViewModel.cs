@@ -7,7 +7,7 @@ namespace Sudoku.ViewModels;
 public class BoardViewModel : ViewModelBase
 {
     private CellViewModel?[] CellViewModels { get; } = new CellViewModel[81];
-    private Stack<HashSet<int>[]> UndoStack { get; } = new();
+    private Stack<CellState[]> UndoStack { get; } = new();
     
     public Board Board { get; } = new();
     public bool IsDirty { get; set; } = true;

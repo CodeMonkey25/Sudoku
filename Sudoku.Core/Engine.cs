@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudoku
@@ -69,7 +68,7 @@ namespace Sudoku
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
             foreach (int value in cell.Candidates.ToArray())
             {
-                HashSet<int>[] state = board.GetState();
+                CellState[] state = board.GetState();
                 guesses++;
                 try
                 {
