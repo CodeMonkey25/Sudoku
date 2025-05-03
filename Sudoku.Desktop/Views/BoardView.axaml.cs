@@ -29,12 +29,12 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
             
             // add the single border around each cell 
             if (i % 9 == 0) left = 1;
-            if(i < 9) top = 2;
+            if(i < 9) top = 3;
             
             // double the thickness around each 3x3 grid
-            if (i % 3 == 0) left = 2;
-            if (i % 9 == 8) right = 2; 
-            if((i / 9) % 3 == 2) bottom = 2;
+            if (i % 3 == 0) left = 3;
+            if (i % 9 == 8) right = 3; 
+            if((i / 9) % 3 == 2) bottom = 3;
             
             cellBorder.BorderThickness = new Thickness(left, top, right, bottom);
             cellBorder[!Border.BorderBrushProperty] = this[!UserControl.ForegroundProperty];

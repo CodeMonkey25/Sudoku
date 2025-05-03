@@ -11,7 +11,7 @@
                            x:DataType="vm:MainWindowViewModel"
                            Icon="/Assets/avalonia-logo.ico"
                            Title="Sudoku Solver"
-                           Width="550" Height="550">
+                           SizeToContent="WidthAndHeight">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>

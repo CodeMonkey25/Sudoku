@@ -19,7 +19,7 @@
     </reactiveUi:ReactiveUserControl.DataContext>
     
     <Grid ColumnDefinitions="*" RowDefinitions="*" Background="Transparent" PointerPressed="InputElement_OnPointerPressed">
-        <TextBlock FontSize="10" Text="{Binding Notes}" TextWrapping="Wrap" IsVisible="{Binding IsNotesVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <TextBlock FontSize="10" Text="{Binding Notes}" TextWrapping="Wrap" IsVisible="{Binding IsNotesVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" />
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" Text="{Binding Value}" Foreground="{Binding $parent[views:CellView].ValueBrush}" IsVisible="{Binding IsValueVisible}" />
     </Grid>
 </reactiveUi:ReactiveUserControl>
