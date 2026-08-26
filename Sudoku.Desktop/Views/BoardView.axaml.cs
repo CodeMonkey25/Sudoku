@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Disposables.Fluent;
 using Avalonia;
 using Avalonia.Controls;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Disposables;
 using Splat;
 using Sudoku.ViewModels;
 
@@ -43,8 +44,7 @@ public partial class BoardView : ReactiveUserControl<BoardViewModel>
 
         this.WhenActivated(disposables =>
         {
-            this.WhenAnyValue(x => x.ViewModel)
-                .Subscribe(vm =>
+            ObservableExtensions.Subscribe(this.WhenAnyValue(x => x.ViewModel), vm =>
                 {
                     foreach (CellView cellView in _cellViews)
                     {

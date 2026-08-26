@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
+using ReactiveUI.Primitives.Disposables;
 
 namespace Sudoku.ViewModels;
 
@@ -12,7 +13,7 @@ public class BoardViewModel : ViewModelBase
     public Board Board { get; } = new();
     public bool IsDirty { get; set; } = true;
     
-    protected override void HandleActivation(CompositeDisposable disposables)
+    protected override void HandleActivation(MultipleDisposable disposables)
     {
         base.HandleActivation(disposables);
         

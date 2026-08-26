@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -9,12 +8,15 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Disposables;
 using Splat;
 using Sudoku.Enumerations;
 using Sudoku.Extensions;
 using Sudoku.Services;
 using Sudoku.Utility;
 using Sudoku.ViewModels;
+using TimeSpan = System.TimeSpan;
 
 namespace Sudoku.Views;
 
@@ -80,11 +82,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         
         Board.ViewModel = Locator.Current.GetService<BoardViewModel>();
 
-        this.WhenActivated(disposables =>
+        this.WhenActivated((MultipleDisposable disposables) =>
         {
-            Observable.Interval(TimeSpan.FromSeconds(0.5))
-                .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .Subscribe(_ => Board.Tick())
+            ObservableExtensions.Subscribe(
+                Observable.Interval(TimeSpan.FromSeconds(0.5))
+                        .ObserveOn(RxSchedulers.MainThreadScheduler), _ => Board.Tick()
+                )
                 .DisposeWith(disposables);
         });
     }
