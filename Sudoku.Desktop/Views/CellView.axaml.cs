@@ -55,7 +55,7 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
         {
             ItemsSource = ViewModel
                 .Cell
-                .Candidates
+                .GetCandidates()
                 .Order()
                 .Select(i=> new MenuItem { Header = i.ToString(), Command = SolveCellCommand, CommandParameter = i})
                 .ToArray(),

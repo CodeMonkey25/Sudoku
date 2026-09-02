@@ -202,7 +202,7 @@ namespace Sudoku
                 if (cell.Index <= 9) sb.Append('0');
                 sb.Append(cell.Index);
                 sb.Append(" => ");
-                sb.AppendJoin(", ", cell.Candidates.OrderBy(static i => i));
+                sb.AppendJoin(", ", cell.GetCandidates().OrderBy(static i => i));
                 sb.AppendLine();
             }
 
@@ -249,7 +249,7 @@ namespace Sudoku
             {
                 if (cell.Value == value) return false; // already solved with this value
                 if (cell.IsSolved) continue; // already solved with a different value
-                if (!cell.Candidates.Contains(value)) continue; // can't be this value
+                if (!cell.HasCandidate(value)) continue; // can't be this value
                 if (loneCandidate != null) return false; // already have a candidate, so not a lone candidate
 
                 loneCandidate = cell;
@@ -287,17 +287,17 @@ namespace Sudoku
         {
             bool boardChanged = false;
 
-            IEqualityComparer<ISet<int>> comparer = new SetEqualityComparer<int>();
+            IEqualityComparer<int[]> comparer = new ArrayEqualityComparer<int>();
             
-            var groups = cells.GroupBy(c => c.Candidates, comparer)
+            var groups = cells.GroupBy(c => c.GetCandidates().ToArray(), comparer)
                 .Where(static g => g.Count() > 1)
                 .Where(static g => g.Count() < 5) // what would be best here? anything under 9?
-                .Where(static g => g.Key.Count == g.Count())
+                .Where(static g => g.Key.Length == g.Count())
                 .ToArray();
 
-            foreach (IGrouping<ISet<int>, Cell> grouping in groups)
+            foreach (IGrouping<int[], Cell> grouping in groups)
             {
-                ISet<int> candidates = grouping.Key;
+                int[] candidates = grouping.Key;
                 HashSet<Cell> deadlockedCells = grouping.ToHashSet();
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
@@ -359,7 +359,7 @@ namespace Sudoku
         {
             return Cells
                 .Where(static c => !c.IsSolved)
-                .MinBy(static c => c.Candidates.Count)!;
+                .MinBy(static c => c.CountCandidates())!;
         }
     }
 }

@@ -14,7 +14,7 @@ public partial class CellViewModel : ViewModelBase
     [Reactive] private ICommand? _solveValueCommand = NullCommand.Instance;
     
     public string Value => Cell.Value == 0 ? " " : Cell.Value.ToString();
-    public string Notes => Cell.IsSolved ? string.Empty : string.Join(" ", Cell.Candidates.Order());
+    public string Notes => Cell.IsSolved ? string.Empty : string.Join(" ", Cell.GetCandidates().Order());
     public bool IsValueVisible => Cell.IsSolved;
     public bool IsNotesVisible => !Cell.IsSolved;
     

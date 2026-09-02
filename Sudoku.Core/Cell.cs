@@ -11,12 +11,12 @@ namespace Sudoku
         public int Value;
         public bool IsGiven;
 
-        public readonly HashSet<int> Candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        private readonly HashSet<int> _candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         private readonly List<Cell> _boundCells = new(24);
 
         public void Dispose()
         {
-            Candidates.Clear();
+            _candidates.Clear();
             _boundCells.Clear();
         }
 
@@ -42,13 +42,13 @@ namespace Sudoku
                 return;
             }
 
-            if (!Candidates.Contains(value))
+            if (!_candidates.Contains(value))
             {
                 throw new Exception($"Value {value} is not valid for cell {Index}!");
             }
 
-            Candidates.Clear();
-            Candidates.Add(value);
+            _candidates.Clear();
+            _candidates.Add(value);
             IsSolved = true;
             Value = value;
 
@@ -57,6 +57,12 @@ namespace Sudoku
                 cell.RemoveCandidate(value);
             }
         }
+        
+        public int CountCandidates() => _candidates.Count;
+        
+        public bool HasCandidate(int value) => _candidates.Contains(value);
+        
+        public IEnumerable<int> GetCandidates() => _candidates;
 
         private bool RemoveCandidate(int value)
         {
@@ -70,10 +76,10 @@ namespace Sudoku
                 return false;
             }
 
-            if (!Candidates.Remove(value)) return false;
+            if (!_candidates.Remove(value)) return false;
 
-            if (Candidates.Count == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
-            if (Candidates.Count == 1) Solve(Candidates.First());
+            if (_candidates.Count == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
+            if (_candidates.Count == 1) Solve(_candidates.First());
             return true;
         }
 
@@ -90,8 +96,8 @@ namespace Sudoku
         public void Reset()
         {
             Value = 0;
-            Candidates.Clear();
-            Candidates.UnionWith([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            _candidates.Clear();
+            _candidates.UnionWith([1, 2, 3, 4, 5, 6, 7, 8, 9]);
             IsSolved = false;
             IsGiven = false;
         }
@@ -100,19 +106,19 @@ namespace Sudoku
         {
             return new CellState()
             {
-                Candidates = Candidates.ToHashSet(),
+                Candidates = _candidates.ToHashSet(),
                 IsGiven = IsGiven,
             };
         }
 
         public void SetState(CellState state)
         {
-            Candidates.Clear();
-            Candidates.UnionWith(state.Candidates);
-            if (Candidates.Count == 1)
+            _candidates.Clear();
+            _candidates.UnionWith(state.Candidates);
+            if (_candidates.Count == 1)
             {
                 IsSolved = true;
-                Value = Candidates.First();
+                Value = _candidates.First();
             }
             IsGiven = state.IsGiven;
         }
