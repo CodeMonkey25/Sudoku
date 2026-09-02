@@ -25,6 +25,7 @@ namespace Sudoku
             foreach (Cell cell in cells)
             {
                 if (cell == this) continue;
+                if (_boundCells.Contains(cell)) continue;
                 _boundCells.Add(cell);
             }
         }
