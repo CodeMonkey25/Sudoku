@@ -5,5 +5,5 @@ namespace Sudoku;
 public class CellState
 {
     public bool IsGiven { get; set; }
-    public HashSet<int> Candidates { get; set; } = [];
+    public bool[] Candidates { get; set; } = new bool[9];
 }

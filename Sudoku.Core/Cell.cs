@@ -4,19 +4,25 @@ using System.Linq;
 
 namespace Sudoku
 {
-    public sealed class Cell(int index) : IDisposable
+    public sealed class Cell : IDisposable
     {
-        public readonly int Index = index;
+        public readonly int Index;
         public bool IsSolved;
         public int Value;
         public bool IsGiven;
 
-        private readonly HashSet<int> _candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        private readonly bool[] _candidates = new bool[9];
         private readonly List<Cell> _boundCells = new(24);
+
+        public Cell(int index)
+        {
+            Index = index;
+            Array.Fill(_candidates, true);
+        }
 
         public void Dispose()
         {
-            _candidates.Clear();
+            ClearCandidates();
             _boundCells.Clear();
         }
 
@@ -42,13 +48,13 @@ namespace Sudoku
                 return;
             }
 
-            if (!_candidates.Contains(value))
+            if (!HasCandidate(value))
             {
                 throw new Exception($"Value {value} is not valid for cell {Index}!");
             }
 
-            _candidates.Clear();
-            _candidates.Add(value);
+            ClearCandidates();
+            AddCandidate(value);
             IsSolved = true;
             Value = value;
 
@@ -58,11 +64,29 @@ namespace Sudoku
             }
         }
         
-        public int CountCandidates() => _candidates.Count;
+        public void ClearCandidates() => Array.Clear(_candidates);
         
-        public bool HasCandidate(int value) => _candidates.Contains(value);
+        public int CountCandidates()
+        {
+            int count = 0;
+            foreach (bool b in _candidates)
+            {
+                if (b) count++;
+            }
+            return count;
+        }
+
+        public bool HasCandidate(int value) => _candidates[value - 1];
         
-        public IEnumerable<int> GetCandidates() => _candidates;
+        public IEnumerable<int> GetCandidates()
+        {
+            for (int i = 0; i < _candidates.Length; i++)
+            {
+                if (_candidates[i]) yield return i + 1;
+            }
+        }
+
+        private void AddCandidate(int value) => _candidates[value - 1] = true;
 
         private bool RemoveCandidate(int value)
         {
@@ -76,10 +100,11 @@ namespace Sudoku
                 return false;
             }
 
-            if (!_candidates.Remove(value)) return false;
+            if (!HasCandidate(value)) return false;
 
-            if (_candidates.Count == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
-            if (_candidates.Count == 1) Solve(_candidates.First());
+            _candidates[value - 1] = false;
+            if (CountCandidates() == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
+            if (CountCandidates() == 1) Solve(GetCandidates().First());
             return true;
         }
 
@@ -96,29 +121,25 @@ namespace Sudoku
         public void Reset()
         {
             Value = 0;
-            _candidates.Clear();
-            _candidates.UnionWith([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            Array.Fill(_candidates, true);
             IsSolved = false;
             IsGiven = false;
         }
         
         public CellState GetState()
         {
-            return new CellState()
-            {
-                Candidates = _candidates.ToHashSet(),
-                IsGiven = IsGiven,
-            };
+            CellState state = new() { IsGiven = IsGiven, };
+            Array.Copy(_candidates, state.Candidates, state.Candidates.Length);
+            return state;
         }
 
         public void SetState(CellState state)
         {
-            _candidates.Clear();
-            _candidates.UnionWith(state.Candidates);
-            if (_candidates.Count == 1)
+            Array.Copy(state.Candidates, _candidates, state.Candidates.Length);
+            if (_candidates.Length == 1)
             {
                 IsSolved = true;
-                Value = _candidates.First();
+                Value = GetCandidates().First();
             }
             IsGiven = state.IsGiven;
         }
