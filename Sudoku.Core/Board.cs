@@ -216,7 +216,7 @@ namespace Sudoku
                 if (cell.Index <= 9) sb.Append('0');
                 sb.Append(cell.Index);
                 sb.Append(" => ");
-                sb.AppendJoin(", ", cell.GetCandidates().OrderBy(static i => i));
+                sb.AppendJoin(", ", cell.GetCandidates());
                 sb.AppendLine();
             }
 
