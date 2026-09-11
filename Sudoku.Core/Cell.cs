@@ -8,7 +8,6 @@ namespace Sudoku
     public sealed class Cell : IDisposable
     {
         public readonly int Index;
-        public bool IsSolved;
         public int Value;
         public bool IsGiven;
 
@@ -16,6 +15,19 @@ namespace Sudoku
 
         private int _candidates = AllCandidatesMask;
         private readonly List<Cell> _boundCells = new(24);
+
+        public event Action<Cell, bool>? IsSolvedChanged;
+
+        public bool IsSolved
+        {
+            get;
+            private set
+            {
+                if (field == value) return;
+                field = value;
+                IsSolvedChanged?.Invoke(this, value);
+            }
+        }
 
         public Cell(int index)
         {
@@ -26,6 +38,7 @@ namespace Sudoku
         {
             ClearCandidates();
             _boundCells.Clear();
+            IsSolvedChanged = null;
         }
 
         public void BindTo(Cell[] cells)

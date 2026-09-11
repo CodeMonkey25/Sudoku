@@ -13,10 +13,23 @@ namespace Sudoku
         private Cell[][] Columns { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
         private Cell[][] Grids { get; } = Enumerable.Range(0, 9).Select(static _ => new Cell[9]).ToArray();
 
+        private int _unsolvedCount;
+
         public Board()
         {
             InitializeGroupings();
             BindCells();
+
+            _unsolvedCount = Cells.Length;
+            foreach (Cell cell in Cells)
+            {
+                cell.IsSolvedChanged += OnCellIsSolvedChanged;
+            }
+        }
+
+        private void OnCellIsSolvedChanged(Cell cell, bool isSolved)
+        {
+            _unsolvedCount += isSolved ? -1 : 1;
         }
 
         public void Dispose()
@@ -328,12 +341,12 @@ namespace Sudoku
 
         public bool IsUnsolved()
         {
-            return Cells.Any(cell => !cell.IsSolved);
+            return _unsolvedCount > 0;
         }
 
         public bool IsSolved()
         {
-            return Cells.All(cell => cell.IsSolved);
+            return _unsolvedCount == 0;
         }
 
         public bool IsSolutionValid()
