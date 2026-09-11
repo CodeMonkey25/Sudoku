@@ -71,10 +71,11 @@ namespace Sudoku
         public int CountCandidates() => BitOperations.PopCount((uint)_candidates);
 
         public bool HasCandidate(int value) => (_candidates & (1 << (value - 1))) != 0;
-        
-        public IEnumerable<int> GetCandidates()
+
+        public int CandidateMask => _candidates;
+
+        public static IEnumerable<int> GetCandidatesFromMask(int mask)
         {
-            int mask = _candidates;
             while (mask != 0)
             {
                 int bit = mask & -mask;
@@ -82,6 +83,8 @@ namespace Sudoku
                 mask &= mask - 1;
             }
         }
+        
+        public IEnumerable<int> GetCandidates() => GetCandidatesFromMask(_candidates);
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace Sudoku
@@ -287,18 +288,29 @@ namespace Sudoku
         {
             bool boardChanged = false;
 
-            IEqualityComparer<int[]> comparer = new ArrayEqualityComparer<int>();
-            
-            var groups = cells.GroupBy(c => c.GetCandidates().ToArray(), comparer)
-                .Where(static g => g.Count() > 1)
-                .Where(static g => g.Count() < 5) // what would be best here? anything under 9?
-                .Where(static g => g.Key.Length == g.Count())
-                .ToArray();
+            Dictionary<int, List<Cell>> byMask = new();
 
-            foreach (IGrouping<int[], Cell> grouping in groups)
+            foreach (Cell cell in cells)
             {
-                int[] candidates = grouping.Key;
-                HashSet<Cell> deadlockedCells = grouping.ToHashSet();
+                if (cell.IsSolved) continue;
+
+                int mask = cell.CandidateMask;
+                if (!byMask.TryGetValue(mask, out List<Cell>? group))
+                {
+                    byMask[mask] = group = [];
+                }
+
+                group.Add(cell);
+            }
+
+            foreach ((int mask, List<Cell> group) in byMask)
+            {
+                if (group.Count <= 1) continue;
+                if (group.Count >= 5) continue; // what would be best here? anything under 9?
+                if (BitOperations.PopCount((uint)mask) != group.Count) continue;
+
+                HashSet<Cell> deadlockedCells = group.ToHashSet();
+                int[] candidates = Cell.GetCandidatesFromMask(mask).ToArray();
 
                 string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
