@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-
 namespace Sudoku;
 
 public class CellState
 {
     public bool IsGiven { get; set; }
-    public bool[] Candidates { get; set; } = new bool[9];
+    public int Candidates { get; set; } = 0b1_1111_1111;
 }

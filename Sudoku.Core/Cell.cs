@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sudoku
 {
@@ -11,13 +12,14 @@ namespace Sudoku
         public int Value;
         public bool IsGiven;
 
-        private readonly bool[] _candidates = new bool[9];
+        private const int AllCandidatesMask = 0b1_1111_1111;
+
+        private int _candidates = AllCandidatesMask;
         private readonly List<Cell> _boundCells = new(24);
 
         public Cell(int index)
         {
             Index = index;
-            Array.Fill(_candidates, true);
         }
 
         public void Dispose()
@@ -64,29 +66,24 @@ namespace Sudoku
             }
         }
         
-        public void ClearCandidates() => Array.Clear(_candidates);
+        public void ClearCandidates() => _candidates = 0;
         
-        public int CountCandidates()
-        {
-            int count = 0;
-            foreach (bool b in _candidates)
-            {
-                if (b) count++;
-            }
-            return count;
-        }
+        public int CountCandidates() => BitOperations.PopCount((uint)_candidates);
 
-        public bool HasCandidate(int value) => _candidates[value - 1];
+        public bool HasCandidate(int value) => (_candidates & (1 << (value - 1))) != 0;
         
         public IEnumerable<int> GetCandidates()
         {
-            for (int i = 0; i < _candidates.Length; i++)
+            int mask = _candidates;
+            while (mask != 0)
             {
-                if (_candidates[i]) yield return i + 1;
+                int bit = mask & -mask;
+                yield return BitOperations.TrailingZeroCount(bit) + 1;
+                mask &= mask - 1;
             }
         }
 
-        private void AddCandidate(int value) => _candidates[value - 1] = true;
+        private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 
         private bool RemoveCandidate(int value)
         {
@@ -102,7 +99,7 @@ namespace Sudoku
 
             if (!HasCandidate(value)) return false;
 
-            _candidates[value - 1] = false;
+            _candidates &= ~(1 << (value - 1));
             if (CountCandidates() == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
             if (CountCandidates() == 1) Solve(GetCandidates().First());
             return true;
@@ -121,22 +118,20 @@ namespace Sudoku
         public void Reset()
         {
             Value = 0;
-            Array.Fill(_candidates, true);
+            _candidates = AllCandidatesMask;
             IsSolved = false;
             IsGiven = false;
         }
         
         public CellState GetState()
         {
-            CellState state = new() { IsGiven = IsGiven, };
-            Array.Copy(_candidates, state.Candidates, state.Candidates.Length);
-            return state;
+            return new CellState() { IsGiven = IsGiven, Candidates = _candidates, };
         }
 
         public void SetState(CellState state)
         {
-            Array.Copy(state.Candidates, _candidates, state.Candidates.Length);
-            if (_candidates.Length == 1)
+            _candidates = state.Candidates;
+            if (CountCandidates() == 1)
             {
                 IsSolved = true;
                 Value = GetCandidates().First();
