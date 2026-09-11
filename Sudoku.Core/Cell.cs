@@ -14,7 +14,7 @@ namespace Sudoku
         private const int AllCandidatesMask = 0b1_1111_1111;
 
         private int _candidates = AllCandidatesMask;
-        private readonly List<Cell> _boundCells = new(24);
+        private readonly HashSet<Cell> _boundCells = new(24);
 
         public event Action<Cell, bool>? IsSolvedChanged;
 
@@ -46,7 +46,6 @@ namespace Sudoku
             foreach (Cell cell in cells)
             {
                 if (cell == this) continue;
-                if (_boundCells.Contains(cell)) continue;
                 _boundCells.Add(cell);
             }
         }
