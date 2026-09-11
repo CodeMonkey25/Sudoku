@@ -5,11 +5,16 @@ namespace Sudoku
 {
     public class Engine
     {
-        private Action<string> _log;
+        private readonly Action<string>? _log;
 
-        public Engine(Action<string> log)
+        public Engine(Action<string>? log = null)
         {
             _log = log;
+        }
+
+        private void Log(string message)
+        {
+            _log?.Invoke(message);
         }
 
         public int[] Solve(int[] puzzle)
@@ -26,37 +31,38 @@ namespace Sudoku
             {
                 string divider = new('*', 40);
 
-                _log(divider);
-                _log(">>>>> Unable to find solution! <<<<<");
-                _log(divider);
+                Log(divider);
+                Log(">>>>> Unable to find solution! <<<<<");
+                Log(divider);
             }
             else if (board.IsSolutionValid())
             {
-                _log(string.Empty);
-                _log("Solution found! :-)");
+                Log(string.Empty);
+                Log("Solution found! :-)");
             }
             else
             {
-                _log(string.Empty);
-                _log("Invalid solution found! :-(");
+                Log(string.Empty);
+                Log("Invalid solution found! :-(");
             }
-            _log($"Number of guesses: {guesses}");
+            Log($"Number of guesses: {guesses}");
 
-            _log(string.Empty);
+            Log(string.Empty);
             return board.GetSolution();
         }
 
         private void PrintCandidates(Board board, string message)
         {
+            if (_log == null) return;
             string debugSpacer = new('*', 40);
-            
-            _log(string.Empty);
-            _log(debugSpacer);
-            _log(string.Empty);
-            _log(message);
-            _log(board.CandidatesListing());
-            _log(debugSpacer);
-            _log(string.Empty);
+
+            Log(string.Empty);
+            Log(debugSpacer);
+            Log(string.Empty);
+            Log(message);
+            Log(board.CandidatesListing());
+            Log(debugSpacer);
+            Log(string.Empty);
         }
 
         private bool _solveLoop(Board board, ref int guesses)
@@ -72,16 +78,16 @@ namespace Sudoku
                 guesses++;
                 try
                 {
-                    _log($"Guessing {value} for cell #{cell.Index}");
+                    Log($"Guessing {value} for cell #{cell.Index}");
                     cell.Solve(value);
                     if (_solveLoop(board, ref guesses)) return true;
                 }
                 catch
                 {
-                    _log("Failed to solve - Guess was bad! :-(");
+                    Log("Failed to solve - Guess was bad! :-(");
                 }
 
-                _log($"Reverting guess {value} for cell #{cell.Index}");
+                Log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(state);
                 guesses--;
             }
@@ -90,6 +96,8 @@ namespace Sudoku
 
         private bool _solveLogically(Board board)
         {
+            Action<string> logAction = _log ?? (_ => { });
+            
             // the cells are bound to one another when the board is created
             // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
             // if a remaining candidate list has only a single value, the cell declares itself solved and notifies its bound cells  
@@ -106,10 +114,10 @@ namespace Sudoku
                 
                 // check for cells with the only value for a row/col/grid
                 // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
-                boardChanged = boardChanged || board.CheckForLoneCandidates(_log);
+                boardChanged = boardChanged || board.CheckForLoneCandidates(logAction);
                 
                 // check for deadlocks
-                boardChanged = boardChanged || board.CheckForDeadlockedCells(_log);
+                boardChanged = boardChanged || board.CheckForDeadlockedCells(logAction);
 
                 PrintCandidates(board, "Board State");
                 if (!boardChanged) break;
