@@ -225,10 +225,12 @@ namespace Sudoku
 
         public bool CheckForLoneCandidates(Action<string> log)
         {
-            return Enumerable.Range(1, 9)
-                // .AsParallel() // bad idea, race condition on candidates
-                .Select(i => CheckForLoneCandidates(log, i))
-                .Aggregate(false, (acc, val) => acc || val);
+            bool boardChanged = false;
+            for (int i = 1; i <= 9; i++)
+            {
+                if (CheckForLoneCandidates(log, i)) boardChanged = true;
+            }
+            return boardChanged;
         }
 
         private bool CheckForLoneCandidates(Action<string> log, int value)
@@ -291,10 +293,12 @@ namespace Sudoku
 
         private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping)
         {
-            return cellGrouping
-                // .AsParallel() // bad idea, race condition on candidates
-                .Select(cells => CheckForDeadlockedCells(log, cells))
-                .Aggregate(false, (acc, val) => acc || val);
+            bool boardChanged = false;
+            foreach (Cell[] cells in cellGrouping)
+            {
+                if (CheckForDeadlockedCells(log, cells)) boardChanged = true;
+            }
+            return boardChanged;
         }
 
         private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells)
@@ -322,16 +326,15 @@ namespace Sudoku
                 if (group.Count >= 5) continue; // what would be best here? anything under 9?
                 if (BitOperations.PopCount((uint)mask) != group.Count) continue;
 
-                HashSet<Cell> deadlockedCells = group.ToHashSet();
                 int[] candidates = Cell.GetCandidatesFromMask(mask).ToArray();
 
-                string cellsText = string.Join(", ", deadlockedCells.Select(static c => c.Index));
+                string cellsText = string.Join(", ", group.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);
                 log($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
                 foreach (Cell cell in cells)
                 {
-                    if (deadlockedCells.Contains(cell)) continue;
+                    if (group.Contains(cell)) continue;
                     if (cell.RemoveCandidates(candidates)) boardChanged = true;
                 }
             }
@@ -365,7 +368,11 @@ namespace Sudoku
 
         private static bool IsSolutionValid(Cell[][] cellGrouping)
         {
-            return cellGrouping.All(IsSolutionValid);
+            foreach (Cell[] cells in cellGrouping)
+            {
+                if (!IsSolutionValid(cells)) return false;
+            }
+            return true;
         }
 
         private static bool IsSolutionValid(Cell[] cells)
@@ -382,9 +389,20 @@ namespace Sudoku
 
         public Cell GetCellWithLeastAmountOfCandidates()
         {
-            return Cells
-                .Where(static c => !c.IsSolved)
-                .MinBy(static c => c.CountCandidates())!;
+            Cell? best = null;
+            int bestCount = int.MaxValue;
+            foreach (Cell cell in Cells)
+            {
+                if (cell.IsSolved) continue;
+                int count = cell.CountCandidates();
+                if (count < bestCount)
+                {
+                    best = cell;
+                    bestCount = count;
+                    if (count == 2) break; // can't do better than 2 for an unsolved cell
+                }
+            }
+            return best!;
         }
     }
 }

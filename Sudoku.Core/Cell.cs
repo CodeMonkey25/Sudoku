@@ -115,15 +115,16 @@ namespace Sudoku
             if (!HasCandidate(value)) return false;
 
             _candidates &= ~(1 << (value - 1));
-            if (CountCandidates() == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
-            if (CountCandidates() == 1) Solve(GetCandidates().First());
+            int remaining = CountCandidates();
+            if (remaining == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
+            if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1);
             return true;
         }
 
-        public bool RemoveCandidates(IEnumerable<int> candidates)
+        public bool RemoveCandidates(IReadOnlyList<int> candidates)
         {
             bool cellChanged = false;
-            foreach (int candidate in candidates.ToArray())
+            foreach (int candidate in candidates)
             {
                 if (RemoveCandidate(candidate)) cellChanged = true;
             }
