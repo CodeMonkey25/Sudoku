@@ -394,7 +394,7 @@ namespace Sudoku
             foreach (Cell cell in Cells)
             {
                 if (cell.IsSolved) continue;
-                int count = cell.CountCandidates();
+                int count = cell.GetCandidateCount();
                 if (count < bestCount)
                 {
                     best = cell;

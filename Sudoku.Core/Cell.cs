@@ -80,7 +80,7 @@ namespace Sudoku
         
         public void ClearCandidates() => _candidates = 0;
         
-        public int CountCandidates() => BitOperations.PopCount((uint)_candidates);
+        public int GetCandidateCount() => BitOperations.PopCount((uint)_candidates);
 
         public bool HasCandidate(int value) => (_candidates & (1 << (value - 1))) != 0;
 
@@ -115,7 +115,7 @@ namespace Sudoku
             if (!HasCandidate(value)) return false;
 
             _candidates &= ~(1 << (value - 1));
-            int remaining = CountCandidates();
+            int remaining = GetCandidateCount();
             if (remaining == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
             if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1);
             return true;
@@ -147,7 +147,7 @@ namespace Sudoku
         public void SetState(CellState state)
         {
             _candidates = state.Candidates;
-            if (CountCandidates() == 1)
+            if (GetCandidateCount() == 1)
             {
                 IsSolved = true;
                 Value = GetCandidates().First();
