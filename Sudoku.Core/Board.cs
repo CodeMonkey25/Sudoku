@@ -218,12 +218,19 @@ namespace Sudoku
         {
             StringBuilder sb = new();
 
+            Span<int> buffer = stackalloc int[9];
             foreach (Cell cell in Cells)
             {
                 if (cell.Index <= 9) sb.Append('0');
                 sb.Append(cell.Index);
                 sb.Append(" => ");
-                sb.AppendJoin(", ", cell.GetCandidates());
+                bool addComma = true;
+                foreach (int candidate in cell.GetCandidates(buffer))
+                {
+                    if (addComma) sb.Append(", ");
+                    sb.Append(candidate);
+                    addComma = false;
+                }
                 sb.AppendLine();
             }
 
@@ -342,17 +349,28 @@ namespace Sudoku
 
                 group.Add(cell);
             }
-
+            
+            Span<int> buffer = stackalloc int[9];
             foreach ((int mask, List<Cell> group) in byMask)
             {
                 if (group.Count <= 1) continue;
-                if (group.Count >= 5) continue; // what would be best here? anything under 9?
+                if (group.Count >= 9) continue; // what would be best here? anything under 9?
                 if (BitOperations.PopCount((uint)mask) != group.Count) continue;
 
-                int[] candidates = Cell.GetCandidatesFromMask(mask);
-
-                string cellsText = string.Join(", ", group.Select(static c => c.Index));
-                string candidatesText = string.Join(", ", candidates);
+                ReadOnlySpan<int> candidates = Cell.GetCandidatesFromMask(mask, buffer);
+                
+                StringBuilder cellsText = new();
+                StringBuilder candidatesText = new();
+                foreach (int candidate in candidates)
+                {
+                    if (candidatesText.Length > 0) candidatesText.Append(", ");
+                    candidatesText.Append(candidate);
+                }
+                foreach (Cell cell in group)
+                {
+                    if (cellsText.Length > 0) cellsText.Append(", ");
+                    cellsText.Append(cell.Index);
+                }
                 log($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
 
                 foreach (Cell cell in cells)

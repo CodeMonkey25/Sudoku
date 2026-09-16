@@ -80,7 +80,8 @@ namespace Sudoku
 
             // try to guess the solution by checking candidates
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
-            foreach (int value in cell.GetCandidates())
+            Span<int> buffer = stackalloc int[9];
+            foreach (int value in cell.GetCandidates(buffer))
             {
                 BoardState state = board.GetState();
                 guesses++;

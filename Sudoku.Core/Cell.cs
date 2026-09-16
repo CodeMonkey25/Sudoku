@@ -91,22 +91,21 @@ namespace Sudoku
 
         public int CandidateMask => _candidates;
 
-        private static int GetCandidateCount(int mask) => BitOperations.PopCount((uint)mask);
-
-        public static int[] GetCandidatesFromMask(int mask)
+        public static ReadOnlySpan<int> GetCandidatesFromMask(int mask, Span<int> buffer)
         {
-            int[] candidates = new int[GetCandidateCount(mask)];
             int i = 0;
             while (mask != 0)
             {
                 int bit = mask & -mask;
-                candidates[i++] = BitOperations.TrailingZeroCount(bit) + 1;
+                buffer[i++] = BitOperations.TrailingZeroCount(bit) + 1;
                 mask &= mask - 1;
             }
-            return candidates;
+            return buffer.Slice(0, i);
         }
         
-        public int[] GetCandidates() => GetCandidatesFromMask(_candidates);
+        public ReadOnlySpan<int> GetCandidates(Span<int> buffer) => GetCandidatesFromMask(_candidates, buffer);
+        
+        public int[] GetCandidates() => GetCandidatesFromMask(_candidates, stackalloc int[9]).ToArray();
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 
@@ -133,7 +132,7 @@ namespace Sudoku
             return true;
         }
 
-        public bool RemoveCandidates(IReadOnlyList<int> candidates, out bool error)
+        public bool RemoveCandidates(ReadOnlySpan<int> candidates, out bool error)
         {
             bool changed = false;
             error = false;
@@ -161,10 +160,11 @@ namespace Sudoku
         public void SetState(CellState state)
         {
             _candidates = state.Candidates;
-            if (GetCandidateCount() == 1)
+            ReadOnlySpan<int> candidates = GetCandidates(stackalloc int[9]);
+            if (candidates.Length == 1)
             {
                 IsSolved = true;
-                Value = GetCandidates()[0];
+                Value = candidates[0];
             }
             IsGiven = state.IsGiven;
         }
