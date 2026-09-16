@@ -349,7 +349,7 @@ namespace Sudoku
                 if (group.Count >= 5) continue; // what would be best here? anything under 9?
                 if (BitOperations.PopCount((uint)mask) != group.Count) continue;
 
-                int[] candidates = Cell.GetCandidatesFromMask(mask).ToArray();
+                int[] candidates = Cell.GetCandidatesFromMask(mask);
 
                 string cellsText = string.Join(", ", group.Select(static c => c.Index));
                 string candidatesText = string.Join(", ", candidates);

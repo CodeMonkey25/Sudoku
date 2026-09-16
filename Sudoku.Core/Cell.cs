@@ -91,17 +91,22 @@ namespace Sudoku
 
         public int CandidateMask => _candidates;
 
-        public static IEnumerable<int> GetCandidatesFromMask(int mask)
+        private static int GetCandidateCount(int mask) => BitOperations.PopCount((uint)mask);
+
+        public static int[] GetCandidatesFromMask(int mask)
         {
+            int[] candidates = new int[GetCandidateCount(mask)];
+            int i = 0;
             while (mask != 0)
             {
                 int bit = mask & -mask;
-                yield return BitOperations.TrailingZeroCount(bit) + 1;
+                candidates[i++] = BitOperations.TrailingZeroCount(bit) + 1;
                 mask &= mask - 1;
             }
+            return candidates;
         }
         
-        public IEnumerable<int> GetCandidates() => GetCandidatesFromMask(_candidates);
+        public int[] GetCandidates() => GetCandidatesFromMask(_candidates);
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 
@@ -159,7 +164,7 @@ namespace Sudoku
             if (GetCandidateCount() == 1)
             {
                 IsSolved = true;
-                Value = GetCandidates().First();
+                Value = GetCandidates()[0];
             }
             IsGiven = state.IsGiven;
         }
