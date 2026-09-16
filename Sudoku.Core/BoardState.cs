@@ -1,6 +1,8 @@
 namespace Sudoku;
 
-public class BoardState
+public struct BoardState
 {
-    public CellState[] CellStates { get; set; } = [];
+    public CellState[] CellStates { get; init; } = [];
+    
+    public BoardState() { }
 }
