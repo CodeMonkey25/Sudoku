@@ -17,17 +17,23 @@ namespace Sudoku
             _log?.Invoke(message);
         }
 
-        public int[] Solve(int[] puzzle)
+        public int[] Solve(int[] puzzle, out bool error)
         {
+            error = false;
             using Board board = new();
             
-            board.LoadPuzzle(puzzle);
+            board.LoadPuzzle(puzzle, out error);
+            if (error)
+            {
+                Log("Malformed puzzle :-(");
+                return [];
+            }
             PrintCandidates(board, "Initial setup");
             
             int guesses = 0;
-            _solveLoop(board, ref guesses);
+            _solveLoop(board, ref guesses, out error);
             
-            if (board.IsUnsolved())
+            if (error || board.IsUnsolved())
             {
                 string divider = new('*', 40);
 
@@ -65,10 +71,12 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool _solveLoop(Board board, ref int guesses)
+        private bool _solveLoop(Board board, ref int guesses, out bool error)
         {
+            error = false;
             // try to solve the puzzle logically
-            if (_solveLogically(board)) return true;
+            if (_solveLogically(board, out error)) return true;
+            if (error) return false;
 
             // try to guess the solution by checking candidates
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
@@ -76,17 +84,18 @@ namespace Sudoku
             {
                 BoardState state = board.GetState();
                 guesses++;
-                try
+                Log($"Guessing {value} for cell #{cell.Index}");
+                cell.Solve(value, out error);
+                if (!error)
                 {
-                    Log($"Guessing {value} for cell #{cell.Index}");
-                    cell.Solve(value);
-                    if (_solveLoop(board, ref guesses)) return true;
-                }
-                catch
-                {
-                    Log("Failed to solve - Guess was bad! :-(");
+                    if (_solveLoop(board, ref guesses, out error))
+                    {
+                        if (!error) return true;
+                    }
                 }
 
+                Log("Failed to solve - Guess was bad! :-(");
+                
                 Log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(state);
                 guesses--;
@@ -94,8 +103,9 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool _solveLogically(Board board)
+        private bool _solveLogically(Board board, out bool error)
         {
+            error = false;
             Action<string> logAction = _log ?? (_ => { });
             
             // the cells are bound to one another when the board is created
@@ -106,18 +116,18 @@ namespace Sudoku
             {
                 bool boardChanged = false;
                 
-                // we are using the logical or operators below to only run methods until the board changes, then skip the others
-                
                 // check for solved cells
                 // this is obsolete -> the bound cells already notify each other when they are solved
                 // boardChanged = boardChanged || board.CheckForSolvedCells();
                 
                 // check for cells with the only value for a row/col/grid
                 // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
-                boardChanged = boardChanged || board.CheckForLoneCandidates(logAction);
+                if (board.CheckForLoneCandidates(logAction, out error)) boardChanged = true;
+                if (error) return false;
                 
                 // check for deadlocks
-                boardChanged = boardChanged || board.CheckForDeadlockedCells(logAction);
+                if (board.CheckForDeadlockedCells(logAction, out error)) boardChanged = true;
+                if (error) return false;
 
                 PrintCandidates(board, "Board State");
                 if (!boardChanged) break;

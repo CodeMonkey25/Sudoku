@@ -50,13 +50,15 @@ namespace Sudoku
             }
         }
         
-        public void Solve(int value)
+        public void Solve(int value, out bool error)
         {
+            error = false;
             if (IsSolved)
             {
                 if (value != Value)
                 {
-                    throw new Exception($"Cell {Index} is already solved with a different value: {Value} != {value}");
+                    // throw new Exception($"Cell {Index} is already solved with a different value: {Value} != {value}");
+                    error = true;
                 }
 
                 return;
@@ -64,7 +66,9 @@ namespace Sudoku
 
             if (!HasCandidate(value))
             {
-                throw new Exception($"Value {value} is not valid for cell {Index}!");
+                // throw new Exception($"Value {value} is not valid for cell {Index}!");
+                error = true;
+                return;
             }
 
             ClearCandidates();
@@ -74,7 +78,8 @@ namespace Sudoku
 
             foreach (Cell cell in _boundCells)
             {
-                cell.RemoveCandidate(value);
+                cell.RemoveCandidate(value, out error);
+                if (error) break;
             }
         }
         
@@ -100,35 +105,39 @@ namespace Sudoku
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 
-        private bool RemoveCandidate(int value)
+        private bool RemoveCandidate(int value, out bool error)
         {
+            error = false;
             if (IsSolved)
             {
-                if (value == Value)
-                {
-                    throw new Exception($"Cell {Index} - Attempting to remove solved value {value}!");
-                }
-
+                // throw new Exception($"Cell {Index} - Attempting to remove solved value {value}!");
+                error = value == Value;
                 return false;
             }
-
             if (!HasCandidate(value)) return false;
 
             _candidates &= ~(1 << (value - 1));
             int remaining = GetCandidateCount();
-            if (remaining == 0) throw new Exception($"Cell {Index} - No remaining candidates!");
-            if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1);
+            if (remaining == 0)
+            {
+                // throw new Exception($"Cell {Index} - No remaining candidates!");
+                error = true;
+                return false;
+            }
+            if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1, out error);
             return true;
         }
 
-        public bool RemoveCandidates(IReadOnlyList<int> candidates)
+        public bool RemoveCandidates(IReadOnlyList<int> candidates, out bool error)
         {
-            bool cellChanged = false;
+            bool changed = false;
+            error = false;
             foreach (int candidate in candidates)
             {
-                if (RemoveCandidate(candidate)) cellChanged = true;
+                if (RemoveCandidate(candidate, out error)) changed = true;
+                if (error) return false;
             }
-            return cellChanged;
+            return changed;
         }
 
         public void Reset()

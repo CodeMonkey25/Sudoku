@@ -37,7 +37,7 @@ public partial class CellViewModel : ViewModelBase
     private Unit SolveValue(int value)
     {
         IsSolvingEventHandler(this, EventArgs.Empty);
-        Cell.Solve(value);
+        Cell.Solve(value, out bool _);
         IsSolvedEventHandler(this, EventArgs.Empty);
         return Unit.Default;
     }

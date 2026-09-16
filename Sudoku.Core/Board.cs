@@ -190,9 +190,15 @@ namespace Sudoku
             return loadedPuzzle;
         }
             
-        public void LoadPuzzle(int[] puzzle)
+        public void LoadPuzzle(int[] puzzle, out bool error)
         {
-            if (puzzle.Length != Cells.Length) throw new Exception("Puzzle length does not match board length!");
+            error = false;
+            if (puzzle.Length != Cells.Length) 
+            {
+                // throw new Exception("Puzzle length does not match board length!");
+                error = true;
+                return;
+            }
 
             for (int i = 0; i < puzzle.Length; i++)
             {
@@ -202,7 +208,8 @@ namespace Sudoku
             for (int i = 0; i < puzzle.Length; i++)
             {
                 if (puzzle[i] == 0) continue;
-                Cells[i].Solve(puzzle[i]);
+                Cells[i].Solve(puzzle[i], out error);
+                if (error) return;
                 Cells[i].IsGiven = true;
             }
         }
@@ -223,43 +230,53 @@ namespace Sudoku
             return sb.ToString();
         }
 
-        public bool CheckForLoneCandidates(Action<string> log)
+        public bool CheckForLoneCandidates(Action<string> log, out bool error)
         {
+            error = false;
             bool boardChanged = false;
             for (int i = 1; i <= 9; i++)
             {
-                if (CheckForLoneCandidates(log, i)) boardChanged = true;
+                if (CheckForLoneCandidates(log, i, out error)) boardChanged = true;
+                if (error) return false;
             }
             return boardChanged;
         }
 
-        private bool CheckForLoneCandidates(Action<string> log, int value)
+        private bool CheckForLoneCandidates(Action<string> log, int value, out bool error)
         {
+            error = false;
+            
             // check rows
-            bool boardChanged = CheckForLoneCandidates(log, Rows, value);
+            bool boardChanged = CheckForLoneCandidates(log, Rows, value, out error);
+            if (error) return false;
 
             // check columns
-            if (CheckForLoneCandidates(log, Columns, value)) boardChanged = true;
+            if (CheckForLoneCandidates(log, Columns, value, out error)) boardChanged = true;
+            if (error) return false;
 
             // check grids
-            if (CheckForLoneCandidates(log, Grids, value)) boardChanged = true;
+            if (CheckForLoneCandidates(log, Grids, value, out error)) boardChanged = true;
+            if (error) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Action<string> log, Cell[][] cellGrouping, int value)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[][] cellGrouping, int value, out bool error)
         {
+            error = false;
             bool boardChanged = false;
             foreach (Cell[] cell in cellGrouping)
             {
-                if (CheckForLoneCandidates(log, cell, value)) boardChanged = true;
+                if (CheckForLoneCandidates(log, cell, value, out error)) boardChanged = true;
+                if (error) return false;
             }
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Action<string> log, Cell[] cells, int value)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[] cells, int value, out bool error)
         {
+            error = false;
             Cell? loneCandidate = null;
             foreach (Cell cell in cells)
             {
@@ -273,36 +290,42 @@ namespace Sudoku
 
             if (loneCandidate == null) return false;
             log($"Lone Candidate: Cell #{loneCandidate.Index} solved to {value}");
-            loneCandidate.Solve(value);
-            return true;
+            loneCandidate.Solve(value, out error);
+            return !error;
         }
 
-        public bool CheckForDeadlockedCells(Action<string> log)
+        public bool CheckForDeadlockedCells(Action<string> log, out bool error)
         {
             // check rows
-            bool boardChanged = CheckForDeadlockedCells(log, Rows);
+            bool boardChanged = CheckForDeadlockedCells(log, Rows, out error);
+            if (error) return false;
 
             // check columns
-            if (CheckForDeadlockedCells(log, Columns)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Columns, out error)) boardChanged = true;
+            if (error) return false;
 
             // check grids
-            if (CheckForDeadlockedCells(log, Grids)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Grids, out error)) boardChanged = true;
+            if (error) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, out bool error)
         {
+            error = false;
             bool boardChanged = false;
             foreach (Cell[] cells in cellGrouping)
             {
-                if (CheckForDeadlockedCells(log, cells)) boardChanged = true;
+                if (CheckForDeadlockedCells(log, cells, out error)) boardChanged = true;
+                if (error) return false;
             }
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, out bool error)
         {
+            error = false;
             bool boardChanged = false;
 
             Dictionary<int, List<Cell>> byMask = new();
@@ -335,7 +358,8 @@ namespace Sudoku
                 foreach (Cell cell in cells)
                 {
                     if (group.Contains(cell)) continue;
-                    if (cell.RemoveCandidates(candidates)) boardChanged = true;
+                    if (cell.RemoveCandidates(candidates, out error)) boardChanged = true;
+                    if (error) return false;
                 }
             }
 

@@ -29,7 +29,13 @@ public partial class SolverWindowViewModel : ViewModelBase
         PrintPuzzle(Puzzle);
         
         Engine engine = new(Log);
-        int[] solution = engine.Solve(Puzzle);
+        int[] solution = engine.Solve(Puzzle, out bool error);
+        if (error)
+        {
+            Log("Error occurred during solving!");
+            return;
+        }
+
         PrintPuzzle(solution);
         
         watch.Stop();
