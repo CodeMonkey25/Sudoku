@@ -303,55 +303,61 @@ namespace Sudoku
 
         public bool CheckForDeadlockedCells(Action<string> log, out bool error)
         {
+            Dictionary<int, List<Cell>> maskMap = new();
+            
             // check rows
-            bool boardChanged = CheckForDeadlockedCells(log, Rows, out error);
+            bool boardChanged = CheckForDeadlockedCells(log, Rows, maskMap, out error);
             if (error) return false;
 
             // check columns
-            if (CheckForDeadlockedCells(log, Columns, out error)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Columns, maskMap, out error)) boardChanged = true;
             if (error) return false;
 
             // check grids
-            if (CheckForDeadlockedCells(log, Grids, out error)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Grids, maskMap, out error)) boardChanged = true;
             if (error) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, out bool error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<int, List<Cell>> maskMap, out bool error)
         {
             error = false;
             bool boardChanged = false;
             foreach (Cell[] cells in cellGrouping)
             {
-                if (CheckForDeadlockedCells(log, cells, out error)) boardChanged = true;
+                if (CheckForDeadlockedCells(log, cells, maskMap, out error)) boardChanged = true;
                 if (error) return false;
             }
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, out bool error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<int, List<Cell>> maskMap, out bool error)
         {
             error = false;
             bool boardChanged = false;
 
-            Dictionary<int, List<Cell>> byMask = new();
-
+            foreach (List<Cell> list in maskMap.Values) list.Clear();
+            
             foreach (Cell cell in cells)
             {
                 if (cell.IsSolved) continue;
 
                 int mask = cell.CandidateMask;
-                if (!byMask.TryGetValue(mask, out List<Cell>? group))
+                if (maskMap.TryGetValue(mask, out List<Cell>? group))
                 {
-                    byMask[mask] = group = [];
+                    group.Add(cell);
                 }
-
-                group.Add(cell);
+                else
+                {
+                    maskMap[mask] = new List<Cell>(9) { cell, };
+                }
             }
             
             Span<int> buffer = stackalloc int[9];
-            foreach ((int mask, List<Cell> group) in byMask)
+            StringBuilder cellsText = new();
+            StringBuilder candidatesText = new();
+            foreach ((int mask, List<Cell> group) in maskMap)
             {
                 if (group.Count <= 1) continue;
                 if (group.Count >= 9) continue; // what would be best here? anything under 9?
@@ -359,13 +365,13 @@ namespace Sudoku
 
                 ReadOnlySpan<int> candidates = Cell.GetCandidatesFromMask(mask, buffer);
                 
-                StringBuilder cellsText = new();
-                StringBuilder candidatesText = new();
+                candidatesText.Clear();
                 foreach (int candidate in candidates)
                 {
                     if (candidatesText.Length > 0) candidatesText.Append(", ");
                     candidatesText.Append(candidate);
                 }
+                cellsText.Clear();
                 foreach (Cell cell in group)
                 {
                     if (cellsText.Length > 0) cellsText.Append(", ");
