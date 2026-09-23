@@ -170,37 +170,17 @@ namespace Sudoku
                     loopState.CandidatesIndex++;
                     if (loopState.CandidatesIndex >= loopState.CandidatesCount)
                     {
-                        suppressLogicalSolve = true;
+                        error = suppressLogicalSolve = true;
                         continue; // ran out of candidates, previous guess was bad
                     }
                 }
                 else
                 {
-                    do
-                    {
-                        cellIndex++;
-                    } while (cellIndex < board.Cells.Length && board.Cells[cellIndex].IsSolved);
-
-                    if (cellIndex == board.Cells.Length)
-                    {
-                        if (board.IsSolved()) break;
-                        suppressLogicalSolve = true;
-                        error = true;
-                        continue;
-                    }
-                    
-                    // cellIndex = board.GetCellWithLeastAmountOfCandidates().Index;
-                    loopState = new LoopState(cellIndex, board.GetState(), board.Cells[cellIndex].GetCandidateCount(), 0, board.Cells[cellIndex].GetCandidates());
+                    cellIndex = board.GetCellWithLeastAmountOfCandidates().Index;
+                    loopState = new LoopState(cellIndex, board.GetState(), board.Cells[cellIndex].GetCandidateCount(), 0);
                 }
                 
                 int value = board.Cells[cellIndex].GetCandidate(loopState.CandidatesIndex);
-
-                if (value != loopState.Candidates[loopState.CandidatesIndex])
-                {
-                    Log("ERROR - candidate mismatch!");
-                    error = true;
-                    return;
-                }
                 
                 Log($"Guessing {value} for cell #{cellIndex}");
                 loopStates.Push(loopState);
@@ -223,15 +203,13 @@ namespace Sudoku
             public BoardState State { get; }
             public int CandidatesCount { get; }
             public int CandidatesIndex { get; set; }
-            public int[] Candidates { get; }
 
-            public LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex, int[] candidates)
+            public LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex)
             {
                 CellIndex = cellIndex;
                 State = state;
                 CandidatesCount = candidatesCount;
                 CandidatesIndex = candidatesIndex;
-                Candidates = candidates;
             }
         }
     }
