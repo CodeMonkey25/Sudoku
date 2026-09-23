@@ -31,7 +31,7 @@ namespace Sudoku
             PrintCandidates(board, "Initial setup");
             
             int guesses = 0;
-            _solveLoop(board, ref guesses, out error);
+            SolveRecursively(board, ref guesses, out error);
             
             if (error || board.IsUnsolved())
             {
@@ -71,40 +71,7 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool _solveLoop(Board board, ref int guesses, out bool error)
-        {
-            error = false;
-            // try to solve the puzzle logically
-            if (_solveLogically(board, out error)) return true;
-            if (error) return false;
-
-            // try to guess the solution by checking candidates
-            Cell cell = board.GetCellWithLeastAmountOfCandidates();
-            Span<int> buffer = stackalloc int[9];
-            foreach (int value in cell.GetCandidates(buffer))
-            {
-                BoardState state = board.GetState();
-                guesses++;
-                Log($"Guessing {value} for cell #{cell.Index}");
-                cell.Solve(value, out error);
-                if (!error)
-                {
-                    if (_solveLoop(board, ref guesses, out error))
-                    {
-                        if (!error) return true;
-                    }
-                }
-
-                Log("Failed to solve - Guess was bad! :-(");
-                
-                Log($"Reverting guess {value} for cell #{cell.Index}");
-                board.RestoreState(state);
-                guesses--;
-            }
-            return board.IsSolved();
-        }
-
-        private bool _solveLogically(Board board, out bool error)
+        private bool SolveLogically(Board board, out bool error)
         {
             error = false;
             Action<string> logAction = _log ?? (_ => { });
@@ -134,6 +101,39 @@ namespace Sudoku
                 if (!boardChanged) break;
             }
 
+            return board.IsSolved();
+        }
+
+        private bool SolveRecursively(Board board, ref int guesses, out bool error)
+        {
+            error = false;
+            // try to solve the puzzle logically
+            if (SolveLogically(board, out error)) return true;
+            if (error) return false;
+
+            // try to guess the solution by checking candidates
+            Cell cell = board.GetCellWithLeastAmountOfCandidates();
+            Span<int> buffer = stackalloc int[9];
+            foreach (int value in cell.GetCandidates(buffer))
+            {
+                BoardState state = board.GetState();
+                guesses++;
+                Log($"Guessing {value} for cell #{cell.Index}");
+                cell.Solve(value, out error);
+                if (!error)
+                {
+                    if (SolveRecursively(board, ref guesses, out error))
+                    {
+                        if (!error) return true;
+                    }
+                }
+
+                Log("Failed to solve - Guess was bad! :-(");
+                
+                Log($"Reverting guess {value} for cell #{cell.Index}");
+                board.RestoreState(state);
+                guesses--;
+            }
             return board.IsSolved();
         }
     }
