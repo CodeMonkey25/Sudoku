@@ -224,12 +224,12 @@ namespace Sudoku
                 if (cell.Index <= 9) sb.Append('0');
                 sb.Append(cell.Index);
                 sb.Append(" => ");
-                bool addComma = true;
+                bool addComma = false;
                 foreach (int candidate in cell.GetCandidates(buffer))
                 {
                     if (addComma) sb.Append(", ");
                     sb.Append(candidate);
-                    addComma = false;
+                    addComma = true;
                 }
                 sb.AppendLine();
             }
