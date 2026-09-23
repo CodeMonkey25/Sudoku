@@ -106,6 +106,20 @@ namespace Sudoku
         public ReadOnlySpan<int> GetCandidates(Span<int> buffer) => GetCandidatesFromMask(_candidates, buffer);
         
         public int[] GetCandidates() => GetCandidatesFromMask(_candidates, stackalloc int[9]).ToArray();
+        
+        public int GetCandidate(int index)
+        {
+            int mask = _candidates;
+            int count = 0;
+            while (mask != 0)
+            {
+                int bit = mask & -mask;
+                if (count == index) return BitOperations.TrailingZeroCount(bit) + 1;
+                mask &= mask - 1;
+                count++;
+            }
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 

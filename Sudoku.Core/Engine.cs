@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudoku
@@ -31,7 +32,7 @@ namespace Sudoku
             PrintCandidates(board, "Initial setup");
             
             int guesses = 0;
-            SolveRecursively(board, ref guesses, out error);
+            SolveIteratively(board, ref guesses, out error);
             
             if (error || board.IsUnsolved())
             {
@@ -75,14 +76,16 @@ namespace Sudoku
         {
             error = false;
             Action<string> logAction = _log ?? (_ => { });
+            bool boardChanged = true;
+            bool printUpdate = false;
             
             // the cells are bound to one another when the board is created
             // when any cell is solved, it will notify the bound cells so they remove the solved value from their candidate list
             // if a remaining candidate list has only a single value, the cell declares itself solved and notifies its bound cells  
             // this does the majority of the work, but it does not solve every puzzle
-            while (board.IsUnsolved())
+            while (boardChanged && board.IsUnsolved())
             {
-                bool boardChanged = false;
+                boardChanged = false;
                 
                 // check for solved cells
                 // this is obsolete -> the bound cells already notify each other when they are solved
@@ -90,17 +93,19 @@ namespace Sudoku
                 
                 // check for cells with the only value for a row/col/grid
                 // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
-                if (board.CheckForLoneCandidates(logAction, out error)) boardChanged = true;
+                if (board.CheckForLoneCandidates(logAction, out error)) printUpdate = boardChanged = true;
                 if (error) return false;
                 
                 // check for deadlocks
-                if (board.CheckForDeadlockedCells(logAction, out error)) boardChanged = true;
+                if (board.CheckForDeadlockedCells(logAction, out error)) printUpdate = boardChanged = true;
                 if (error) return false;
-
-                PrintCandidates(board, "Board State");
-                if (!boardChanged) break;
             }
 
+            if (printUpdate)
+            {
+                PrintCandidates(board, "Board State");
+            }
+            
             return board.IsSolved();
         }
 
@@ -135,6 +140,99 @@ namespace Sudoku
                 guesses--;
             }
             return board.IsSolved();
+        }
+        
+        private void SolveIteratively(Board board, ref int guesses, out bool error)
+        {
+            error = false;
+            
+            Stack<LoopState> loopStates = new(board.Cells.Length);
+            int cellIndex = -1;
+            bool suppressLogicalSolve = false;
+            do
+            {
+                if (!suppressLogicalSolve && SolveLogically(board, out error)) return;
+                suppressLogicalSolve = false;
+                
+                LoopState loopState;
+                if (error) // an error means the guess was bad
+                {
+                    if (loopStates.Count == 0) return; // unable to solve and no more guesses
+                    
+                    error = false;
+                    loopState = loopStates.Pop();
+                    board.RestoreState(loopState.State);
+                    cellIndex = loopState.CellIndex;
+                    guesses--;
+                    Log("Failed to solve - Guess was bad! :-(");
+                    Log($"Reverted guess {board.Cells[cellIndex].GetCandidate(loopState.CandidatesIndex)} for cell #{cellIndex}");
+                    
+                    loopState.CandidatesIndex++;
+                    if (loopState.CandidatesIndex >= loopState.CandidatesCount)
+                    {
+                        suppressLogicalSolve = true;
+                        continue; // ran out of candidates, previous guess was bad
+                    }
+                }
+                else
+                {
+                    do
+                    {
+                        cellIndex++;
+                    } while (cellIndex < board.Cells.Length && board.Cells[cellIndex].IsSolved);
+
+                    if (cellIndex == board.Cells.Length)
+                    {
+                        if (board.IsSolved()) break;
+                        suppressLogicalSolve = true;
+                        error = true;
+                        continue;
+                    }
+                    
+                    // cellIndex = board.GetCellWithLeastAmountOfCandidates().Index;
+                    loopState = new LoopState(cellIndex, board.GetState(), board.Cells[cellIndex].GetCandidateCount(), 0, board.Cells[cellIndex].GetCandidates());
+                }
+                
+                int value = board.Cells[cellIndex].GetCandidate(loopState.CandidatesIndex);
+
+                if (value != loopState.Candidates[loopState.CandidatesIndex])
+                {
+                    Log("ERROR - candidate mismatch!");
+                    error = true;
+                    return;
+                }
+                
+                Log($"Guessing {value} for cell #{cellIndex}");
+                loopStates.Push(loopState);
+                guesses++;
+                board.Cells[cellIndex].Solve(value, out error);
+                if (error)
+                {
+                    suppressLogicalSolve = true;
+                }
+                else
+                {
+                    if (board.IsSolved()) break;
+                }
+            } while (loopStates.Count > 0);
+        }
+
+        private record struct LoopState
+        {
+            public int CellIndex { get; }
+            public BoardState State { get; }
+            public int CandidatesCount { get; }
+            public int CandidatesIndex { get; set; }
+            public int[] Candidates { get; }
+
+            public LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex, int[] candidates)
+            {
+                CellIndex = cellIndex;
+                State = state;
+                CandidatesCount = candidatesCount;
+                CandidatesIndex = candidatesIndex;
+                Candidates = candidates;
+            }
         }
     }
 }
