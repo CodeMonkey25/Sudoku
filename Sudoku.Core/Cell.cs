@@ -166,19 +166,24 @@ namespace Sudoku
             IsGiven = false;
         }
         
-        public CellState GetState()
-        {
-            return new CellState() { IsGiven = IsGiven, Candidates = _candidates, };
-        }
+        public CellState GetState() => new(IsGiven, _candidates);
 
         public void SetState(CellState state)
         {
             _candidates = state.Candidates;
             ReadOnlySpan<int> candidates = GetCandidates(stackalloc int[9]);
-            if (candidates.Length == 1)
+            switch (candidates.Length)
             {
-                IsSolved = true;
-                Value = candidates[0];
+                case 0:
+                    throw new InvalidOperationException($"Cell {Index} - state has no candidates.");
+                case 1:
+                    IsSolved = true;
+                    Value = candidates[0];
+                    break;
+                default:
+                    IsSolved = false;
+                    Value = 0;
+                    break;
             }
             IsGiven = state.IsGiven;
         }

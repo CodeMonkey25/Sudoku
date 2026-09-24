@@ -88,35 +88,25 @@ namespace Sudoku
             }
         }
 
-        public string GetOriginalPuzzle()
-        {
-            return string.Join(",", Cells.Select(static cell => cell.Value == 0 ? string.Empty : cell.Value.ToString()));
-        }
+        public string GetOriginalPuzzle() => string.Join(",", Cells.Select(static cell => cell.Value == 0 ? string.Empty : cell.Value.ToString()));
 
-        public int[] GetSolution()
-        {
-            return Cells.Select(static cell => cell.Value).ToArray();
-        }
+        public int[] GetSolution() => Cells.Select(static cell => cell.Value).ToArray();
 
         public BoardState GetState()
         {
-            return new BoardState()
+            CellState[] cellStates = new CellState[Cells.Length];
+            for (int i = 0; i < cellStates.Length; i++)
             {
-                CellStates = Cells.Select(static cell => cell.GetState()).ToArray(),
-            };
+                cellStates[i] = Cells[i].GetState();
+            }
+            return new BoardState(cellStates);
         }
-        
+
         public void RestoreState(BoardState state)
         {
-            foreach (Cell cell in Cells)
-            {
-                cell.Reset();
-            }
-
             for (int i = 0; i < state.CellStates.Length; i++)
             {
-                CellState cellState = state.CellStates[i];
-                Cells[i].SetState(cellState);
+                Cells[i].SetState(state.CellStates[i]);
             }
         }
 
