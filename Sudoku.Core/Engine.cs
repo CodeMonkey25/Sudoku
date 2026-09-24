@@ -72,7 +72,7 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool SolveLogically(Board board, out bool error)
+        private bool SolveLogically(Board board, out bool error, Dictionary<int, List<Cell>> buffer)
         {
             error = false;
             Action<string> logAction = _log ?? (_ => { });
@@ -97,7 +97,7 @@ namespace Sudoku
                 if (error) return false;
                 
                 // check for deadlocks
-                if (board.CheckForDeadlockedCells(logAction, out error)) printUpdate = boardChanged = true;
+                if (board.CheckForDeadlockedCells(logAction, out error, buffer)) printUpdate = boardChanged = true;
                 if (error) return false;
             }
 
@@ -109,11 +109,14 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool SolveRecursively(Board board, ref int guesses, out bool error)
+        private bool SolveRecursively(Board board, ref int guesses, out bool error, Dictionary<int, List<Cell>>? bufferMap = null, Stack<BoardState>? boardStatePool = null)
         {
             error = false;
+            if (bufferMap == null) bufferMap = new Dictionary<int, List<Cell>>();
+            if (boardStatePool == null) boardStatePool = new Stack<BoardState>();
+            
             // try to solve the puzzle logically
-            if (SolveLogically(board, out error)) return true;
+            if (SolveLogically(board, out error, bufferMap)) return true;
             if (error) return false;
 
             // try to guess the solution by checking candidates
@@ -121,13 +124,13 @@ namespace Sudoku
             Span<int> buffer = stackalloc int[9];
             foreach (int value in cell.GetCandidates(buffer))
             {
-                BoardState state = board.GetState();
+                BoardState state = boardStatePool.Count > 0 ? board.GetState(boardStatePool.Pop()) : board.GetState();
                 guesses++;
                 Log($"Guessing {value} for cell #{cell.Index}");
                 cell.Solve(value, out error);
                 if (!error)
                 {
-                    if (SolveRecursively(board, ref guesses, out error))
+                    if (SolveRecursively(board, ref guesses, out error, bufferMap, boardStatePool))
                     {
                         if (!error) return true;
                     }
@@ -137,6 +140,7 @@ namespace Sudoku
                 
                 Log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(state);
+                boardStatePool.Push(state);
                 guesses--;
             }
             return board.IsSolved();
@@ -147,14 +151,16 @@ namespace Sudoku
             error = false;
             
             Stack<LoopState> loopStates = new(board.Cells.Length);
-            int cellIndex = -1;
+            Stack<BoardState> boardStatePool = new(board.Cells.Length);
+            Dictionary<int, List<Cell>> buffer = new();
             bool suppressLogicalSolve = false;
             do
             {
-                if (!suppressLogicalSolve && SolveLogically(board, out error)) return;
+                if (!suppressLogicalSolve && SolveLogically(board, out error, buffer)) return;
                 suppressLogicalSolve = false;
                 
                 LoopState loopState;
+                Cell cell;
                 if (error) // an error means the guess was bad
                 {
                     if (loopStates.Count == 0) return; // unable to solve and no more guesses
@@ -162,30 +168,32 @@ namespace Sudoku
                     error = false;
                     loopState = loopStates.Pop();
                     board.RestoreState(loopState.State);
-                    cellIndex = loopState.CellIndex;
+                    cell = board.Cells[loopState.CellIndex];
                     guesses--;
                     Log("Failed to solve - Guess was bad! :-(");
-                    Log($"Reverted guess {board.Cells[cellIndex].GetCandidate(loopState.CandidatesIndex)} for cell #{cellIndex}");
+                    Log($"Reverted guess {cell.GetCandidate(loopState.CandidatesIndex)} for cell #{cell.Index}");
                     
                     loopState.CandidatesIndex++;
                     if (loopState.CandidatesIndex >= loopState.CandidatesCount)
                     {
+                        boardStatePool.Push(loopState.State);
                         error = suppressLogicalSolve = true;
                         continue; // ran out of candidates, previous guess was bad
                     }
                 }
                 else
                 {
-                    cellIndex = board.GetCellWithLeastAmountOfCandidates().Index;
-                    loopState = new LoopState(cellIndex, board.GetState(), board.Cells[cellIndex].GetCandidateCount(), 0);
+                    cell = board.GetCellWithLeastAmountOfCandidates();
+                    BoardState boardState = boardStatePool.Count > 0 ? board.GetState(boardStatePool.Pop()) : board.GetState();
+                    loopState = new LoopState(cell.Index, boardState, cell.GetCandidateCount(), 0);
                 }
                 
-                int value = board.Cells[cellIndex].GetCandidate(loopState.CandidatesIndex);
+                int value = cell.GetCandidate(loopState.CandidatesIndex);
                 
-                Log($"Guessing {value} for cell #{cellIndex}");
+                Log($"Guessing {value} for cell #{cell.Index}");
                 loopStates.Push(loopState);
                 guesses++;
-                board.Cells[cellIndex].Solve(value, out error);
+                cell.Solve(value, out error);
                 if (error)
                 {
                     suppressLogicalSolve = true;
@@ -197,20 +205,12 @@ namespace Sudoku
             } while (loopStates.Count > 0);
         }
 
-        private record struct LoopState
+        private record struct LoopState(int CellIndex, BoardState State, int CandidatesCount, int CandidatesIndex)
         {
-            public int CellIndex { get; }
-            public BoardState State { get; }
-            public int CandidatesCount { get; }
-            public int CandidatesIndex { get; set; }
-
-            public LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex)
-            {
-                CellIndex = cellIndex;
-                State = state;
-                CandidatesCount = candidatesCount;
-                CandidatesIndex = candidatesIndex;
-            }
+            public int CellIndex { get; } = CellIndex;
+            public BoardState State { get; } = State;
+            public int CandidatesCount { get; } = CandidatesCount;
+            public int CandidatesIndex { get; set; } = CandidatesIndex;
         }
     }
 }

@@ -92,14 +92,15 @@ namespace Sudoku
 
         public int[] GetSolution() => Cells.Select(static cell => cell.Value).ToArray();
 
-        public BoardState GetState()
+        public BoardState GetState(BoardState? boardState = null)
         {
-            CellState[] cellStates = new CellState[Cells.Length];
+            CellState[] cellStates = boardState is null ? new CellState[Cells.Length] : boardState.CellStates;
             for (int i = 0; i < cellStates.Length; i++)
             {
                 cellStates[i] = Cells[i].GetState();
             }
-            return new BoardState(cellStates);
+
+            return boardState ?? new BoardState(cellStates);
         }
 
         public void RestoreState(BoardState state)
@@ -291,10 +292,8 @@ namespace Sudoku
             return !error;
         }
 
-        public bool CheckForDeadlockedCells(Action<string> log, out bool error)
+        public bool CheckForDeadlockedCells(Action<string> log, out bool error, Dictionary<int, List<Cell>> maskMap)
         {
-            Dictionary<int, List<Cell>> maskMap = new();
-            
             // check rows
             bool boardChanged = CheckForDeadlockedCells(log, Rows, maskMap, out error);
             if (error) return false;
