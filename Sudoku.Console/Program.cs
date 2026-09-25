@@ -14,11 +14,11 @@ namespace Sudoku
 
             Engine engine = new(Console.WriteLine);
             int[] solution = [];
-            bool error = false;
+            string error = string.Empty;
             string timing = TimeIt(() => solution = engine.Solve(puzzle, out error));
-            if (error)
+            if (!string.IsNullOrEmpty(error))
             {
-                Console.WriteLine("An error occurred solving puzzle :-(");
+                Console.WriteLine($"An error occurred solving puzzle :-( \n{error}");
                 return;
             }
             PrintPuzzle(solution);

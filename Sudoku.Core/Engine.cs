@@ -18,13 +18,13 @@ namespace Sudoku
             _log?.Invoke(message);
         }
 
-        public int[] Solve(int[] puzzle, out bool error)
+        public int[] Solve(int[] puzzle, out string error)
         {
-            error = false;
+            error = string.Empty;
             using Board board = new();
             
             board.LoadPuzzle(puzzle, out error);
-            if (error)
+            if (!string.IsNullOrEmpty(error))
             {
                 Log("Malformed puzzle :-(");
                 return [];
@@ -34,13 +34,17 @@ namespace Sudoku
             int guesses = 0;
             SolveIteratively(board, ref guesses, out error);
             
-            if (error || board.IsUnsolved())
+            if (!string.IsNullOrEmpty(error) || board.IsUnsolved())
             {
                 string divider = new('*', 40);
 
                 Log(divider);
                 Log(">>>>> Unable to find solution! <<<<<");
                 Log(divider);
+                if (string.IsNullOrEmpty(error))
+                {
+                    error = "Unable to find solution!";
+                }
             }
             else if (board.IsSolutionValid())
             {
@@ -51,6 +55,7 @@ namespace Sudoku
             {
                 Log(string.Empty);
                 Log("Invalid solution found! :-(");
+                error = "Invalid solution found! :-(";
             }
             Log($"Number of guesses: {guesses}");
 
@@ -72,9 +77,9 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool SolveLogically(Board board, out bool error, Dictionary<int, List<Cell>> buffer)
+        private bool SolveLogically(Board board, out string error, Dictionary<int, List<Cell>> buffer)
         {
-            error = false;
+            error = string.Empty;
             Action<string> logAction = _log ?? (_ => { });
             bool boardChanged = true;
             bool printUpdate = false;
@@ -94,11 +99,11 @@ namespace Sudoku
                 // check for cells with the only value for a row/col/grid
                 // e.g. this row doesn't have a 9 yet, and this cell is the only one with a candidate for it
                 if (board.CheckForLoneCandidates(logAction, out error)) printUpdate = boardChanged = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
                 
                 // check for deadlocks
                 if (board.CheckForDeadlockedCells(logAction, out error, buffer)) printUpdate = boardChanged = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
             }
 
             if (printUpdate)
@@ -109,15 +114,15 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool SolveRecursively(Board board, ref int guesses, out bool error, Dictionary<int, List<Cell>>? bufferMap = null, Stack<BoardState>? boardStatePool = null)
+        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<int, List<Cell>>? bufferMap = null, Stack<BoardState>? boardStatePool = null)
         {
-            error = false;
+            error = string.Empty;
             if (bufferMap == null) bufferMap = new Dictionary<int, List<Cell>>();
             if (boardStatePool == null) boardStatePool = new Stack<BoardState>();
             
             // try to solve the puzzle logically
             if (SolveLogically(board, out error, bufferMap)) return true;
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             // try to guess the solution by checking candidates
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
@@ -128,11 +133,11 @@ namespace Sudoku
                 guesses++;
                 Log($"Guessing {value} for cell #{cell.Index}");
                 cell.Solve(value, out error);
-                if (!error)
+                if (string.IsNullOrEmpty(error))
                 {
                     if (SolveRecursively(board, ref guesses, out error, bufferMap, boardStatePool))
                     {
-                        if (!error) return true;
+                        if (string.IsNullOrEmpty(error)) return true;
                     }
                 }
 
@@ -146,9 +151,9 @@ namespace Sudoku
             return board.IsSolved();
         }
         
-        private void SolveIteratively(Board board, ref int guesses, out bool error)
+        private void SolveIteratively(Board board, ref int guesses, out string error)
         {
-            error = false;
+            error = string.Empty;
             
             Stack<LoopState> loopStates = new(board.Cells.Length);
             Stack<BoardState> boardStatePool = new(board.Cells.Length);
@@ -161,11 +166,11 @@ namespace Sudoku
                 
                 LoopState loopState;
                 Cell cell;
-                if (error) // an error means the guess was bad
+                if (!string.IsNullOrEmpty(error)) // an error means the guess was bad
                 {
                     if (loopStates.Count == 0) return; // unable to solve and no more guesses
                     
-                    error = false;
+                    error = string.Empty;
                     loopState = loopStates.Pop();
                     board.RestoreState(loopState.State);
                     cell = board.Cells[loopState.CellIndex];
@@ -177,7 +182,8 @@ namespace Sudoku
                     if (loopState.CandidatesIndex >= loopState.CandidatesCount)
                     {
                         boardStatePool.Push(loopState.State);
-                        error = suppressLogicalSolve = true;
+                        error = "ran out of candidates";
+                        suppressLogicalSolve = true;
                         continue; // ran out of candidates, previous guess was bad
                     }
                 }
@@ -194,7 +200,7 @@ namespace Sudoku
                 loopStates.Push(loopState);
                 guesses++;
                 cell.Solve(value, out error);
-                if (error)
+                if (!string.IsNullOrEmpty(error))
                 {
                     suppressLogicalSolve = true;
                 }

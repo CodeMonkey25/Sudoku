@@ -50,15 +50,14 @@ namespace Sudoku
             }
         }
         
-        public void Solve(int value, out bool error)
+        public void Solve(int value, out string error)
         {
-            error = false;
+            error = string.Empty;
             if (IsSolved)
             {
                 if (value != Value)
                 {
-                    // throw new Exception($"Cell {Index} is already solved with a different value: {Value} != {value}");
-                    error = true;
+                    error = $"Cell {Index} is already solved with a different value: {Value} != {value}";
                 }
 
                 return;
@@ -66,8 +65,7 @@ namespace Sudoku
 
             if (!HasCandidate(value))
             {
-                // throw new Exception($"Value {value} is not valid for cell {Index}!");
-                error = true;
+                error = $"Value {value} is not valid for cell {Index}!";
                 return;
             }
 
@@ -79,7 +77,7 @@ namespace Sudoku
             foreach (Cell cell in _boundCells)
             {
                 cell.RemoveCandidate(value, out error);
-                if (error) break;
+                if (!string.IsNullOrEmpty(error)) break;
             }
         }
         
@@ -123,13 +121,15 @@ namespace Sudoku
 
         private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
 
-        private bool RemoveCandidate(int value, out bool error)
+        private bool RemoveCandidate(int value, out string error)
         {
-            error = false;
+            error = string.Empty;
             if (IsSolved)
             {
-                // throw new Exception($"Cell {Index} - Attempting to remove solved value {value}!");
-                error = value == Value;
+                if (value == Value)
+                {
+                    error = $"Cell {Index} - Attempting to remove solved value {value}!";
+                }
                 return false;
             }
             if (!HasCandidate(value)) return false;
@@ -138,22 +138,21 @@ namespace Sudoku
             int remaining = GetCandidateCount();
             if (remaining == 0)
             {
-                // throw new Exception($"Cell {Index} - No remaining candidates!");
-                error = true;
+                error = $"Cell {Index} - No remaining candidates!";
                 return false;
             }
             if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1, out error);
             return true;
         }
 
-        public bool RemoveCandidates(ReadOnlySpan<int> candidates, out bool error)
+        public bool RemoveCandidates(ReadOnlySpan<int> candidates, out string error)
         {
             bool changed = false;
-            error = false;
+            error = string.Empty;
             foreach (int candidate in candidates)
             {
                 if (RemoveCandidate(candidate, out error)) changed = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
             }
             return changed;
         }

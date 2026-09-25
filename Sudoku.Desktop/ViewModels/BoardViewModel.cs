@@ -44,7 +44,7 @@ public class BoardViewModel : ViewModelBase
     public void LoadPuzzle(string puzzleText)
     {
         int[] puzzle = Board.ParsePuzzle(puzzleText);
-        Board.LoadPuzzle(puzzle, out bool _);
+        Board.LoadPuzzle(puzzle, out string _);
         IsDirty = true;
     }
 

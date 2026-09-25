@@ -181,13 +181,12 @@ namespace Sudoku
             return loadedPuzzle;
         }
             
-        public void LoadPuzzle(int[] puzzle, out bool error)
+        public void LoadPuzzle(int[] puzzle, out string error)
         {
-            error = false;
+            error = string.Empty;
             if (puzzle.Length != Cells.Length) 
             {
-                // throw new Exception("Puzzle length does not match board length!");
-                error = true;
+                error = "Puzzle length does not match board length!";
                 return;
             }
 
@@ -200,7 +199,7 @@ namespace Sudoku
             {
                 if (puzzle[i] == 0) continue;
                 Cells[i].Solve(puzzle[i], out error);
-                if (error) return;
+                if (!string.IsNullOrEmpty(error)) return;
                 Cells[i].IsGiven = true;
             }
         }
@@ -228,53 +227,53 @@ namespace Sudoku
             return sb.ToString();
         }
 
-        public bool CheckForLoneCandidates(Action<string> log, out bool error)
+        public bool CheckForLoneCandidates(Action<string> log, out string error)
         {
-            error = false;
+            error = string.Empty;
             bool boardChanged = false;
             for (int i = 1; i <= 9; i++)
             {
                 if (CheckForLoneCandidates(log, i, out error)) boardChanged = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
             }
             return boardChanged;
         }
 
-        private bool CheckForLoneCandidates(Action<string> log, int value, out bool error)
+        private bool CheckForLoneCandidates(Action<string> log, int value, out string error)
         {
-            error = false;
+            error = string.Empty;
             
             // check rows
             bool boardChanged = CheckForLoneCandidates(log, Rows, value, out error);
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             // check columns
             if (CheckForLoneCandidates(log, Columns, value, out error)) boardChanged = true;
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             // check grids
             if (CheckForLoneCandidates(log, Grids, value, out error)) boardChanged = true;
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Action<string> log, Cell[][] cellGrouping, int value, out bool error)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[][] cellGrouping, int value, out string error)
         {
-            error = false;
+            error = string.Empty;
             bool boardChanged = false;
             foreach (Cell[] cell in cellGrouping)
             {
                 if (CheckForLoneCandidates(log, cell, value, out error)) boardChanged = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
             }
 
             return boardChanged;
         }
 
-        private static bool CheckForLoneCandidates(Action<string> log, Cell[] cells, int value, out bool error)
+        private static bool CheckForLoneCandidates(Action<string> log, Cell[] cells, int value, out string error)
         {
-            error = false;
+            error = string.Empty;
             Cell? loneCandidate = null;
             foreach (Cell cell in cells)
             {
@@ -289,41 +288,41 @@ namespace Sudoku
             if (loneCandidate == null) return false;
             log($"Lone Candidate: Cell #{loneCandidate.Index} solved to {value}");
             loneCandidate.Solve(value, out error);
-            return !error;
+            return string.IsNullOrEmpty(error);
         }
 
-        public bool CheckForDeadlockedCells(Action<string> log, out bool error, Dictionary<int, List<Cell>> maskMap)
+        public bool CheckForDeadlockedCells(Action<string> log, out string error, Dictionary<int, List<Cell>> maskMap)
         {
             // check rows
             bool boardChanged = CheckForDeadlockedCells(log, Rows, maskMap, out error);
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             // check columns
             if (CheckForDeadlockedCells(log, Columns, maskMap, out error)) boardChanged = true;
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             // check grids
             if (CheckForDeadlockedCells(log, Grids, maskMap, out error)) boardChanged = true;
-            if (error) return false;
+            if (!string.IsNullOrEmpty(error)) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<int, List<Cell>> maskMap, out bool error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<int, List<Cell>> maskMap, out string error)
         {
-            error = false;
+            error = string.Empty;
             bool boardChanged = false;
             foreach (Cell[] cells in cellGrouping)
             {
                 if (CheckForDeadlockedCells(log, cells, maskMap, out error)) boardChanged = true;
-                if (error) return false;
+                if (!string.IsNullOrEmpty(error)) return false;
             }
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<int, List<Cell>> maskMap, out bool error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<int, List<Cell>> maskMap, out string error)
         {
-            error = false;
+            error = string.Empty;
             bool boardChanged = false;
 
             foreach (List<Cell> list in maskMap.Values) list.Clear();
@@ -372,7 +371,7 @@ namespace Sudoku
                 {
                     if (group.Contains(cell)) continue;
                     if (cell.RemoveCandidates(candidates, out error)) boardChanged = true;
-                    if (error) return false;
+                    if (!string.IsNullOrEmpty(error)) return false;
                 }
             }
 
