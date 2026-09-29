@@ -164,7 +164,7 @@ namespace Sudoku
             IsGiven = false;
         }
         
-        public CellState GetState() => new(IsGiven, _candidates);
+        public CellState GetState() => new((ushort)_candidates);
 
         public void SetState(CellState state)
         {
@@ -183,7 +183,6 @@ namespace Sudoku
                     Value = 0;
                     break;
             }
-            IsGiven = state.IsGiven;
         }
     }
 }
