@@ -1,3 +1,3 @@
 namespace Sudoku;
 
-public record BoardState(CellState[] CellStates);
+public readonly record struct BoardState(CellState[] CellStates);

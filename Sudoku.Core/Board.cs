@@ -94,14 +94,14 @@ namespace Sudoku
 
         public BoardState GetState(BoardState? boardState = null)
         {
-            boardState ??= new BoardState(new CellState[Cells.Length]);
+            BoardState state = boardState ?? new BoardState(new CellState[Cells.Length]);
             
             for (int i = 0; i < Cells.Length; i++)
             {
-                boardState.CellStates[i] = Cells[i].GetState();
+                state.CellStates[i] = Cells[i].GetState();
             }
             
-            return boardState;
+            return state;
         }
 
         public void RestoreState(BoardState state)
