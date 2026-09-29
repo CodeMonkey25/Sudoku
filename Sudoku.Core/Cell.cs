@@ -169,14 +169,14 @@ namespace Sudoku
         public void SetState(CellState state)
         {
             _candidates = state.Candidates;
-            ReadOnlySpan<int> candidates = GetCandidates(stackalloc int[9]);
-            switch (candidates.Length)
+            int count = BitOperations.PopCount((uint)_candidates);
+            switch (count)
             {
                 case 0:
                     throw new InvalidOperationException($"Cell {Index} - state has no candidates.");
                 case 1:
                     IsSolved = true;
-                    Value = candidates[0];
+                    Value = BitOperations.TrailingZeroCount((uint)_candidates) + 1;
                     break;
                 default:
                     IsSolved = false;
