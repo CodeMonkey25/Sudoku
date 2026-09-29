@@ -130,7 +130,7 @@ namespace Sudoku
 
         private static int[] ParsePuzzleWithCommas(string puzzle)
         {
-            // comma seperated format (4,,,,9,,,8 ...)
+            // comma separated format (4,,,,9,,,8 ...)
 
             int[] loadedPuzzle = new int[81];
             int i = 0;
