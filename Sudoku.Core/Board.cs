@@ -92,23 +92,23 @@ namespace Sudoku
 
         public int[] GetSolution() => Cells.Select(static cell => cell.Value).ToArray();
 
-        public BoardState GetState(BoardState? boardState = null)
+        public BoardState GetState()
         {
-            BoardState state = boardState ?? new BoardState(new CellState[Cells.Length]);
+            BoardState state = default;
             
             for (int i = 0; i < Cells.Length; i++)
             {
-                state.CellStates[i] = Cells[i].GetState();
+                state[i] = Cells[i].GetState();
             }
             
             return state;
         }
 
-        public void RestoreState(BoardState state)
+        public void RestoreState(in BoardState state)
         {
-            for (int i = 0; i < state.CellStates.Length; i++)
+            for (int i = 0; i < Cells.Length; i++)
             {
-                Cells[i].SetState(state.CellStates[i]);
+                Cells[i].SetState(state[i]);
             }
         }
 

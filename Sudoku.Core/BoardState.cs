@@ -1,3 +1,9 @@
+using System.Runtime.CompilerServices;
+
 namespace Sudoku;
 
-public readonly record struct BoardState(CellState[] CellStates);
+[InlineArray(81)]
+public struct BoardState
+{
+    private CellState _element0;
+}

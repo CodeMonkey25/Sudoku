@@ -113,28 +113,27 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<int, List<Cell>>? bufferMap = null, Stack<BoardState>? boardStatePool = null)
+        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<int, List<Cell>>? bufferMap = null)
         {
             error = string.Empty;
             if (bufferMap == null) bufferMap = new Dictionary<int, List<Cell>>();
-            if (boardStatePool == null) boardStatePool = new Stack<BoardState>();
             
             // try to solve the puzzle logically
             if (SolveLogically(board, out error, bufferMap)) return true;
             if (!string.IsNullOrEmpty(error)) return false;
 
             // try to guess the solution by checking candidates
+            BoardState state = board.GetState();
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
             Span<int> buffer = stackalloc int[9];
             foreach (int value in cell.GetCandidates(buffer))
             {
-                BoardState state = boardStatePool.Count > 0 ? board.GetState(boardStatePool.Pop()) : board.GetState();
                 guesses++;
                 Log($"Guessing {value} for cell #{cell.Index}");
                 cell.Solve(value, out error);
                 if (string.IsNullOrEmpty(error))
                 {
-                    if (SolveRecursively(board, ref guesses, out error, bufferMap, boardStatePool))
+                    if (SolveRecursively(board, ref guesses, out error, bufferMap))
                     {
                         if (string.IsNullOrEmpty(error)) return true;
                     }
@@ -144,7 +143,6 @@ namespace Sudoku
                 
                 Log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(state);
-                boardStatePool.Push(state);
                 guesses--;
             }
             return board.IsSolved();
@@ -155,7 +153,6 @@ namespace Sudoku
             error = string.Empty;
             
             Stack<LoopState> loopStates = new(board.Cells.Length);
-            Stack<BoardState> boardStatePool = new(board.Cells.Length);
             Dictionary<int, List<Cell>> buffer = new();
             bool suppressLogicalSolve = false;
             do
@@ -180,7 +177,6 @@ namespace Sudoku
                     loopState.CandidatesIndex++;
                     if (loopState.CandidatesIndex >= loopState.CandidatesCount)
                     {
-                        boardStatePool.Push(loopState.State);
                         error = "ran out of candidates";
                         suppressLogicalSolve = true;
                         continue; // ran out of candidates, previous guess was bad
@@ -189,7 +185,7 @@ namespace Sudoku
                 else
                 {
                     cell = board.GetCellWithLeastAmountOfCandidates();
-                    BoardState boardState = boardStatePool.Count > 0 ? board.GetState(boardStatePool.Pop()) : board.GetState();
+                    BoardState boardState = board.GetState();
                     loopState = new LoopState(cell.Index, boardState, cell.GetCandidateCount(), 0);
                 }
                 
