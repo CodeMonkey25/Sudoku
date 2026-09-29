@@ -23,7 +23,7 @@ public partial class CellViewModel : ViewModelBase
     
     public CellViewModel()
     {
-        SolveValueCommand = ReactiveCommand.Create<int, Unit>(SolveValue);
+        SolveValueCommand = ReactiveCommand.Create<(int, bool), Unit>(SolveValue);
     }
 
     public void Tick()
@@ -34,10 +34,11 @@ public partial class CellViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(IsNotesVisible));
     }
 
-    private Unit SolveValue(int value)
+    private Unit SolveValue((int, bool) args)
     {
+        var (value, isGiven) = args;
         IsSolvingEventHandler(this, EventArgs.Empty);
-        Cell.Solve(value, out string _);
+        Cell.Solve(value, out string _, isGiven);
         IsSolvedEventHandler(this, EventArgs.Empty);
         return Unit.Default;
     }

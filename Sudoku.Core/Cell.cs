@@ -6,9 +6,9 @@ namespace Sudoku
 {
     public sealed class Cell : IDisposable
     {
-        public readonly int Index;
-        public int Value;
-        public bool IsGiven;
+        public int Index { get; }
+        public int Value { get; private set; }
+        public bool IsGiven { get; private set; }
 
         private const int AllCandidatesMask = 0b1_1111_1111;
 
@@ -49,7 +49,7 @@ namespace Sudoku
             }
         }
         
-        public void Solve(int value, out string error)
+        public void Solve(int value, out string error, bool isGiven = false)
         {
             error = string.Empty;
             if (IsSolved)
@@ -72,6 +72,7 @@ namespace Sudoku
             AddCandidate(value);
             IsSolved = true;
             Value = value;
+            IsGiven = isGiven;
 
             foreach (Cell cell in _boundCells)
             {

@@ -196,9 +196,8 @@ namespace Sudoku
             for (int i = 0; i < puzzle.Length; i++)
             {
                 if (puzzle[i] == 0) continue;
-                Cells[i].Solve(puzzle[i], out error);
+                Cells[i].Solve(puzzle[i], out error, true);
                 if (!string.IsNullOrEmpty(error)) return;
-                Cells[i].IsGiven = true;
             }
         }
 

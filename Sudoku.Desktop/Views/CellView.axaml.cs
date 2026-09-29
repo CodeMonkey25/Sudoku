@@ -72,11 +72,7 @@ public partial class CellView : ReactiveUserControl<CellViewModel>
         
         try
         {
-            ViewModel.SolveValueCommand.Execute(value);
-            if (window.IsInputGiven)
-            {
-                ViewModel.Cell.IsGiven = true;
-            }
+            ViewModel.SolveValueCommand.Execute((value, window.IsInputGiven));
         }
         catch
         {
