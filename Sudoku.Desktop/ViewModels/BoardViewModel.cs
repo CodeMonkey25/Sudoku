@@ -66,7 +66,8 @@ public class BoardViewModel : ViewModelBase
 
     private void CellIsSolving(object? sender, EventArgs e)
     {
-        UndoStack.Push(Board.GetState());
+        Board.GetState(out BoardState boardState);
+        UndoStack.Push(boardState);
     }
 
     private void CellIsSolved(object? sender, EventArgs e)

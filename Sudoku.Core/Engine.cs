@@ -123,7 +123,7 @@ namespace Sudoku
             if (!string.IsNullOrEmpty(error)) return false;
 
             // try to guess the solution by checking candidates
-            BoardState state = board.GetState();
+            board.GetState(out BoardState state);
             Cell cell = board.GetCellWithLeastAmountOfCandidates();
             Span<int> buffer = stackalloc int[9];
             foreach (int value in cell.GetCandidates(buffer))
@@ -142,7 +142,7 @@ namespace Sudoku
                 Log("Failed to solve - Guess was bad! :-(");
                 
                 Log($"Reverting guess {value} for cell #{cell.Index}");
-                board.RestoreState(state);
+                board.RestoreState(in state);
                 guesses--;
             }
             return board.IsSolved();
@@ -185,7 +185,7 @@ namespace Sudoku
                 else
                 {
                     cell = board.GetCellWithLeastAmountOfCandidates();
-                    BoardState boardState = board.GetState();
+                    board.GetState(out BoardState boardState);
                     loopState = new LoopState(cell.Index, boardState, cell.GetCandidateCount(), 0);
                 }
                 
@@ -206,12 +206,12 @@ namespace Sudoku
             } while (loopStates.Count > 0);
         }
 
-        private record struct LoopState(int CellIndex, BoardState State, int CandidatesCount, int CandidatesIndex)
+        private sealed class LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex)
         {
-            public int CellIndex { get; } = CellIndex;
-            public BoardState State { get; } = State;
-            public int CandidatesCount { get; } = CandidatesCount;
-            public int CandidatesIndex { get; set; } = CandidatesIndex;
+            public int CellIndex { get; } = cellIndex;
+            public BoardState State { get; } = state;
+            public int CandidatesCount { get; } = candidatesCount;
+            public int CandidatesIndex { get; set; } = candidatesIndex;
         }
     }
 }
