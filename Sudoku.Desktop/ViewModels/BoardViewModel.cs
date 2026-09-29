@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 using ReactiveUI.Primitives.Disposables;
 
 namespace Sudoku.ViewModels;
