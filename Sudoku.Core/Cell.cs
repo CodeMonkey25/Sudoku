@@ -13,7 +13,7 @@ namespace Sudoku
         public bool IsGiven { get; private set; }
         public uint CandidatesMask { get; private set; } = AllCandidatesMask;
         
-        private readonly HashSet<Cell> _boundCells = new(24);
+        private readonly HashSet<Cell> _boundCells = new(20);
 
         public event Action<Cell, bool>? IsSolvedChanged;
 
