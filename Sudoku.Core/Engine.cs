@@ -76,7 +76,7 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool SolveLogically(Board board, out string error, Dictionary<int, List<Cell>> buffer)
+        private bool SolveLogically(Board board, out string error, Dictionary<uint, List<Cell>> buffer)
         {
             error = string.Empty;
             Action<string> logAction = _log ?? (_ => { });
@@ -113,10 +113,10 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<int, List<Cell>>? bufferMap = null)
+        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<uint, List<Cell>>? bufferMap = null)
         {
             error = string.Empty;
-            bufferMap ??= new Dictionary<int, List<Cell>>();
+            bufferMap ??= new Dictionary<uint, List<Cell>>();
             
             // try to solve the puzzle logically
             if (SolveLogically(board, out error, bufferMap)) return true;
@@ -156,7 +156,7 @@ namespace Sudoku
             error = string.Empty;
             
             Stack<LoopState> loopStates = new(board.Cells.Length);
-            Dictionary<int, List<Cell>> buffer = new();
+            Dictionary<uint, List<Cell>> buffer = new();
             bool suppressLogicalSolve = false;
             do
             {

@@ -10,9 +10,9 @@ namespace Sudoku
         public int Value { get; private set; }
         public bool IsGiven { get; private set; }
 
-        private const int AllCandidatesMask = 0b1_1111_1111;
+        private const uint AllCandidatesMask = 0b1_1111_1111;
 
-        private int _candidates = AllCandidatesMask;
+        private uint _candidates = AllCandidatesMask;
         private readonly HashSet<Cell> _boundCells = new(24);
 
         public event Action<Cell, bool>? IsSolvedChanged;
@@ -83,19 +83,18 @@ namespace Sudoku
         
         public void ClearCandidates() => _candidates = 0;
         
-        public int GetCandidateCount() => BitOperations.PopCount((uint)_candidates);
+        public int GetCandidateCount() => BitOperations.PopCount(_candidates);
 
-        public bool HasCandidate(int value) => (_candidates & (1 << (value - 1))) != 0;
+        public bool HasCandidate(int value) => (_candidates & (1u << (value - 1))) != 0;
 
-        public int CandidateMask => _candidates;
+        public uint CandidateMask => _candidates;
 
-        public static ReadOnlySpan<int> GetCandidatesFromMask(int mask, Span<int> buffer)
+        public static ReadOnlySpan<int> GetCandidatesFromMask(uint mask, Span<int> buffer)
         {
             int i = 0;
             while (mask != 0)
             {
-                int bit = mask & -mask;
-                buffer[i++] = BitOperations.TrailingZeroCount(bit) + 1;
+                buffer[i++] = BitOperations.TrailingZeroCount(mask) + 1;
                 mask &= mask - 1;
             }
             return buffer.Slice(0, i);
@@ -107,22 +106,18 @@ namespace Sudoku
         
         public int GetCandidate(int index)
         {
-            int mask = _candidates;
+            uint mask = _candidates;
             int count = 0;
             while (mask != 0)
             {
-                if (count == index)
-                {
-                    int bit = mask & -mask;
-                    return BitOperations.TrailingZeroCount(bit) + 1;
-                }
+                if (count == index) return BitOperations.TrailingZeroCount(mask) + 1;
                 mask &= mask - 1;
                 count++;
             }
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
-        private void AddCandidate(int value) => _candidates |= 1 << (value - 1);
+        private void AddCandidate(int value) => _candidates |= 1u << (value - 1);
 
         private bool RemoveCandidate(int value, out string error)
         {
@@ -137,14 +132,14 @@ namespace Sudoku
             }
             if (!HasCandidate(value)) return false;
 
-            _candidates &= ~(1 << (value - 1));
+            _candidates &= ~(1u << (value - 1));
             int remaining = GetCandidateCount();
             if (remaining == 0)
             {
                 error = $"Cell {Index} - No remaining candidates!";
                 return false;
             }
-            if (remaining == 1) Solve(BitOperations.TrailingZeroCount((uint)_candidates) + 1, out error);
+            if (remaining == 1) Solve(BitOperations.TrailingZeroCount(_candidates) + 1, out error);
             return true;
         }
 
@@ -173,14 +168,14 @@ namespace Sudoku
         public void SetState(CellState state)
         {
             _candidates = state.Candidates;
-            int count = BitOperations.PopCount((uint)_candidates);
+            int count = BitOperations.PopCount(_candidates);
             switch (count)
             {
                 case 0:
                     throw new InvalidOperationException($"Cell {Index} - state has no candidates.");
                 case 1:
                     IsSolved = true;
-                    Value = BitOperations.TrailingZeroCount((uint)_candidates) + 1;
+                    Value = BitOperations.TrailingZeroCount(_candidates) + 1;
                     break;
                 default:
                     IsSolved = false;

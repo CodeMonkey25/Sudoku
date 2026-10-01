@@ -288,7 +288,7 @@ namespace Sudoku
             return string.IsNullOrEmpty(error);
         }
 
-        public bool CheckForDeadlockedCells(Action<string> log, out string error, Dictionary<int, List<Cell>> maskMap)
+        public bool CheckForDeadlockedCells(Action<string> log, out string error, Dictionary<uint, List<Cell>> maskMap)
         {
             // check rows
             bool boardChanged = CheckForDeadlockedCells(log, Rows, maskMap, out error);
@@ -305,7 +305,7 @@ namespace Sudoku
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<int, List<Cell>> maskMap, out string error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<uint, List<Cell>> maskMap, out string error)
         {
             error = string.Empty;
             bool boardChanged = false;
@@ -317,7 +317,7 @@ namespace Sudoku
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<int, List<Cell>> maskMap, out string error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<uint, List<Cell>> maskMap, out string error)
         {
             error = string.Empty;
             bool boardChanged = false;
@@ -328,7 +328,7 @@ namespace Sudoku
             {
                 if (cell.IsSolved) continue;
 
-                int mask = cell.CandidateMask;
+                uint mask = cell.CandidateMask;
                 if (maskMap.TryGetValue(mask, out List<Cell>? group))
                 {
                     group.Add(cell);
@@ -342,11 +342,11 @@ namespace Sudoku
             Span<int> buffer = stackalloc int[9];
             StringBuilder cellsText = new();
             StringBuilder candidatesText = new();
-            foreach ((int mask, List<Cell> group) in maskMap)
+            foreach ((uint mask, List<Cell> group) in maskMap)
             {
                 if (group.Count <= 1) continue;
                 if (group.Count >= 9) continue; // what would be best here? anything under 9?
-                if (BitOperations.PopCount((uint)mask) != group.Count) continue;
+                if (BitOperations.PopCount(mask) != group.Count) continue;
 
                 ReadOnlySpan<int> candidates = Cell.GetCandidatesFromMask(mask, buffer);
                 
