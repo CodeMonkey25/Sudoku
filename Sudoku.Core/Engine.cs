@@ -31,7 +31,7 @@ namespace Sudoku
             PrintCandidates(board, "Initial setup");
             
             int guesses = 0;
-            SolveIteratively(board, ref guesses, out error);
+            SolveRecursively(board, ref guesses, out error);
             
             if (!string.IsNullOrEmpty(error) || board.IsUnsolved())
             {
@@ -116,7 +116,7 @@ namespace Sudoku
         private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<int, List<Cell>>? bufferMap = null)
         {
             error = string.Empty;
-            if (bufferMap == null) bufferMap = new Dictionary<int, List<Cell>>();
+            bufferMap ??= new Dictionary<int, List<Cell>>();
             
             // try to solve the puzzle logically
             if (SolveLogically(board, out error, bufferMap)) return true;
@@ -130,6 +130,7 @@ namespace Sudoku
             {
                 guesses++;
                 Log($"Guessing {value} for cell #{cell.Index}");
+                
                 cell.Solve(value, out error);
                 if (string.IsNullOrEmpty(error))
                 {
@@ -145,6 +146,8 @@ namespace Sudoku
                 board.RestoreState(in state);
                 guesses--;
             }
+            
+            error = "No valid candidate branch led to a solution.";
             return board.IsSolved();
         }
         

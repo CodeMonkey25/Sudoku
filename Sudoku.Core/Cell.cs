@@ -103,7 +103,7 @@ namespace Sudoku
         
         public ReadOnlySpan<int> GetCandidates(Span<int> buffer) => GetCandidatesFromMask(_candidates, buffer);
         
-        public int[] GetCandidates() => GetCandidatesFromMask(_candidates, stackalloc int[9]).ToArray();
+        public int[] GetCandidates() => GetCandidates(stackalloc int[9]).ToArray();
         
         public int GetCandidate(int index)
         {
@@ -111,8 +111,11 @@ namespace Sudoku
             int count = 0;
             while (mask != 0)
             {
-                int bit = mask & -mask;
-                if (count == index) return BitOperations.TrailingZeroCount(bit) + 1;
+                if (count == index)
+                {
+                    int bit = mask & -mask;
+                    return BitOperations.TrailingZeroCount(bit) + 1;
+                }
                 mask &= mask - 1;
                 count++;
             }
