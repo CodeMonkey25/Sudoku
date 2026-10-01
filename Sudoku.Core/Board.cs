@@ -328,7 +328,7 @@ namespace Sudoku
             {
                 if (cell.IsSolved) continue;
 
-                uint mask = cell.CandidateMask;
+                uint mask = cell.CandidatesMask;
                 if (maskMap.TryGetValue(mask, out List<Cell>? group))
                 {
                     group.Add(cell);

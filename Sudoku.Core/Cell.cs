@@ -6,13 +6,13 @@ namespace Sudoku
 {
     public sealed class Cell : IDisposable
     {
+        private const uint AllCandidatesMask = 0b1_1111_1111;
+        
         public int Index { get; }
         public int Value { get; private set; }
         public bool IsGiven { get; private set; }
-
-        private const uint AllCandidatesMask = 0b1_1111_1111;
-
-        private uint _candidates = AllCandidatesMask;
+        public uint CandidatesMask { get; private set; } = AllCandidatesMask;
+        
         private readonly HashSet<Cell> _boundCells = new(24);
 
         public event Action<Cell, bool>? IsSolvedChanged;
@@ -81,13 +81,11 @@ namespace Sudoku
             }
         }
         
-        public void ClearCandidates() => _candidates = 0;
+        public void ClearCandidates() => CandidatesMask = 0;
         
-        public int GetCandidateCount() => BitOperations.PopCount(_candidates);
+        public int GetCandidateCount() => BitOperations.PopCount(CandidatesMask);
 
-        public bool HasCandidate(int value) => (_candidates & (1u << (value - 1))) != 0;
-
-        public uint CandidateMask => _candidates;
+        public bool HasCandidate(int value) => (CandidatesMask & (1u << (value - 1))) != 0;
 
         public static ReadOnlySpan<int> GetCandidatesFromMask(uint mask, Span<int> buffer)
         {
@@ -100,13 +98,13 @@ namespace Sudoku
             return buffer.Slice(0, i);
         }
         
-        public ReadOnlySpan<int> GetCandidates(Span<int> buffer) => GetCandidatesFromMask(_candidates, buffer);
+        public ReadOnlySpan<int> GetCandidates(Span<int> buffer) => GetCandidatesFromMask(CandidatesMask, buffer);
         
         public int[] GetCandidates() => GetCandidates(stackalloc int[9]).ToArray();
         
         public int GetCandidate(int index)
         {
-            uint mask = _candidates;
+            uint mask = CandidatesMask;
             int count = 0;
             while (mask != 0)
             {
@@ -117,7 +115,7 @@ namespace Sudoku
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
-        private void AddCandidate(int value) => _candidates |= 1u << (value - 1);
+        private void AddCandidate(int value) => CandidatesMask |= 1u << (value - 1);
 
         private bool RemoveCandidate(int value, out string error)
         {
@@ -132,14 +130,14 @@ namespace Sudoku
             }
             if (!HasCandidate(value)) return false;
 
-            _candidates &= ~(1u << (value - 1));
+            CandidatesMask &= ~(1u << (value - 1));
             int remaining = GetCandidateCount();
             if (remaining == 0)
             {
                 error = $"Cell {Index} - No remaining candidates!";
                 return false;
             }
-            if (remaining == 1) Solve(BitOperations.TrailingZeroCount(_candidates) + 1, out error);
+            if (remaining == 1) Solve(BitOperations.TrailingZeroCount(CandidatesMask) + 1, out error);
             return true;
         }
 
@@ -158,24 +156,24 @@ namespace Sudoku
         public void Reset()
         {
             Value = 0;
-            _candidates = AllCandidatesMask;
+            CandidatesMask = AllCandidatesMask;
             IsSolved = false;
             IsGiven = false;
         }
         
-        public CellState GetState() => new((ushort)_candidates);
+        public CellState GetState() => new((ushort)CandidatesMask);
 
         public void SetState(CellState state)
         {
-            _candidates = state.Candidates;
-            int count = BitOperations.PopCount(_candidates);
+            CandidatesMask = state.Candidates;
+            int count = BitOperations.PopCount(CandidatesMask);
             switch (count)
             {
                 case 0:
                     throw new InvalidOperationException($"Cell {Index} - state has no candidates.");
                 case 1:
                     IsSolved = true;
-                    Value = BitOperations.TrailingZeroCount(_candidates) + 1;
+                    Value = BitOperations.TrailingZeroCount(CandidatesMask) + 1;
                     break;
                 default:
                     IsSolved = false;
