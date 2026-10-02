@@ -144,6 +144,7 @@ namespace Sudoku
                 
                 Log($"Reverting guess {value} for cell #{cell.Index}");
                 board.RestoreState(in state);
+                cell.RemoveCandidates([value,], out error);
                 guesses--;
             }
             
