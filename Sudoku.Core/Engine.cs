@@ -170,7 +170,7 @@ namespace Sudoku
                     
                     error = string.Empty;
                     loopState = loopStates.Pop();
-                    board.RestoreState(loopState.State);
+                    board.RestoreState(in loopState.State);
                     cell = board.Cells[loopState.CellIndex];
                     guesses--;
                     Log("Failed to solve - Guess was bad! :-(");
@@ -187,8 +187,8 @@ namespace Sudoku
                 else
                 {
                     cell = board.GetCellWithLeastAmountOfCandidates();
-                    board.GetState(out BoardState boardState);
-                    loopState = new LoopState(cell.Index, boardState, cell.GetCandidateCount(), 0);
+                    loopState = new LoopState(cell.Index, cell.GetCandidateCount(), 0);
+                    board.GetState(out loopState.State);
                 }
                 
                 int value = cell.GetCandidate(loopState.CandidatesIndex);
@@ -208,10 +208,11 @@ namespace Sudoku
             } while (loopStates.Count > 0);
         }
 
-        private sealed class LoopState(int cellIndex, BoardState state, int candidatesCount, int candidatesIndex)
+        private sealed class LoopState(int cellIndex, int candidatesCount, int candidatesIndex)
         {
+            // field (not property) so the 162-byte state can be written via `out` and read via `in` without copies
+            public BoardState State;
             public int CellIndex { get; } = cellIndex;
-            public BoardState State { get; } = state;
             public int CandidatesCount { get; } = candidatesCount;
             public int CandidatesIndex { get; set; } = candidatesIndex;
         }
