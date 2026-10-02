@@ -13,7 +13,7 @@ namespace Sudoku
         public bool IsGiven { get; private set; }
         public uint CandidatesMask { get; private set; } = AllCandidatesMask;
         
-        private readonly HashSet<Cell> _boundCells = new(20);
+        private readonly Cell?[] _boundCells = new Cell?[20];
 
         public event Action<Cell, bool>? IsSolvedChanged;
 
@@ -36,7 +36,7 @@ namespace Sudoku
         public void Dispose()
         {
             ClearCandidates();
-            _boundCells.Clear();
+            Array.Clear(_boundCells);
             IsSolvedChanged = null;
         }
 
@@ -45,7 +45,25 @@ namespace Sudoku
             foreach (Cell cell in cells)
             {
                 if (cell == this) continue;
-                _boundCells.Add(cell);
+                
+                bool added = false;
+                for (int i = 0; i < _boundCells.Length; i++)
+                {
+                    if (_boundCells[i] == cell)
+                    {
+                        added = true;
+                        break;
+                    }
+                    
+                    if (_boundCells[i] == null)
+                    {
+                        _boundCells[i] = cell;
+                        added = true;
+                        break;
+                    }
+                }
+
+                if (!added) throw new Exception("_boundedCells overflow");
             }
         }
         
@@ -70,13 +88,13 @@ namespace Sudoku
 
             ClearCandidates();
             AddCandidate(value);
-            IsSolved = true;
             Value = value;
+            IsSolved = true;
             IsGiven = isGiven;
 
-            foreach (Cell cell in _boundCells)
+            foreach (Cell? cell in _boundCells)
             {
-                cell.RemoveCandidate(value, out error);
+                cell?.RemoveCandidate(value, out error);
                 if (!string.IsNullOrEmpty(error)) break;
             }
         }
@@ -172,12 +190,12 @@ namespace Sudoku
                 case 0:
                     throw new InvalidOperationException($"Cell {Index} - state has no candidates.");
                 case 1:
-                    IsSolved = true;
                     Value = BitOperations.TrailingZeroCount(CandidatesMask) + 1;
+                    IsSolved = true;
                     break;
                 default:
-                    IsSolved = false;
                     Value = 0;
+                    IsSolved = false;
                     break;
             }
         }
