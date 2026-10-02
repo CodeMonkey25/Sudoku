@@ -288,91 +288,96 @@ namespace Sudoku
             return string.IsNullOrEmpty(error);
         }
 
-        public bool CheckForDeadlockedCells(Action<string> log, out string error, Dictionary<uint, List<Cell>> maskMap)
+        public bool CheckForDeadlockedCells(Action<string> log, out string error)
         {
             // check rows
-            bool boardChanged = CheckForDeadlockedCells(log, Rows, maskMap, out error);
+            bool boardChanged = CheckForDeadlockedCells(log, Rows, out error);
             if (!string.IsNullOrEmpty(error)) return false;
 
             // check columns
-            if (CheckForDeadlockedCells(log, Columns, maskMap, out error)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Columns, out error)) boardChanged = true;
             if (!string.IsNullOrEmpty(error)) return false;
 
             // check grids
-            if (CheckForDeadlockedCells(log, Grids, maskMap, out error)) boardChanged = true;
+            if (CheckForDeadlockedCells(log, Grids, out error)) boardChanged = true;
             if (!string.IsNullOrEmpty(error)) return false;
 
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, Dictionary<uint, List<Cell>> maskMap, out string error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[][] cellGrouping, out string error)
         {
             error = string.Empty;
             bool boardChanged = false;
             foreach (Cell[] cells in cellGrouping)
             {
-                if (CheckForDeadlockedCells(log, cells, maskMap, out error)) boardChanged = true;
+                if (CheckForDeadlockedCells(log, cells, out error)) boardChanged = true;
                 if (!string.IsNullOrEmpty(error)) return false;
             }
             return boardChanged;
         }
 
-        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, Dictionary<uint, List<Cell>> maskMap, out string error)
+        private static bool CheckForDeadlockedCells(Action<string> log, Cell[] cells, out string error)
         {
             error = string.Empty;
             bool boardChanged = false;
-
-            foreach (List<Cell> list in maskMap.Values) list.Clear();
-            
-            foreach (Cell cell in cells)
-            {
-                if (cell.IsSolved) continue;
-
-                uint mask = cell.CandidatesMask;
-                if (maskMap.TryGetValue(mask, out List<Cell>? group))
-                {
-                    group.Add(cell);
-                }
-                else
-                {
-                    maskMap[mask] = new List<Cell>(9) { cell, };
-                }
-            }
-            
             Span<int> buffer = stackalloc int[9];
-            StringBuilder cellsText = new();
-            StringBuilder candidatesText = new();
-            foreach ((uint mask, List<Cell> group) in maskMap)
+
+            for (int i = 0; i < cells.Length; i++)
             {
-                if (group.Count <= 1) continue;
-                if (group.Count >= 9) continue; // what would be best here? anything under 9?
-                if (BitOperations.PopCount(mask) != group.Count) continue;
+                Cell first = cells[i];
+                if (first.IsSolved) continue;
+
+                uint mask = first.CandidatesMask;
+                int size = BitOperations.PopCount(mask);
+                if (size <= 1 || size >= 9) continue; // what would be best here? anything under 9?
+
+                // build membership as a bitset of positions; skip if an earlier cell already owns this mask
+                int members = 1 << i;
+                bool duplicate = false;
+                for (int j = 0; j < cells.Length; j++)
+                {
+                    if (j == i || cells[j].IsSolved || cells[j].CandidatesMask != mask) continue;
+                    if (j < i)
+                    {
+                        duplicate = true;
+                        break;
+                    }
+                    members |= 1 << j;
+                }
+                if (duplicate || BitOperations.PopCount((uint)members) != size) continue;
 
                 ReadOnlySpan<int> candidates = Cell.GetCandidatesFromMask(mask, buffer);
-                
-                candidatesText.Clear();
-                foreach (int candidate in candidates)
-                {
-                    if (candidatesText.Length > 0) candidatesText.Append(", ");
-                    candidatesText.Append(candidate);
-                }
-                cellsText.Clear();
-                foreach (Cell cell in group)
-                {
-                    if (cellsText.Length > 0) cellsText.Append(", ");
-                    cellsText.Append(cell.Index);
-                }
-                log($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
+                LogDeadlock(log, cells, members, candidates);
 
-                foreach (Cell cell in cells)
+                // membership was captured before removal, since removals can cascade into other cells
+                for (int k = 0; k < cells.Length; k++)
                 {
-                    if (group.Contains(cell)) continue;
-                    if (cell.RemoveCandidates(candidates, out error)) boardChanged = true;
+                    if ((members & (1 << k)) != 0) continue;
+                    if (cells[k].RemoveCandidates(candidates, out error)) boardChanged = true;
                     if (!string.IsNullOrEmpty(error)) return false;
                 }
             }
 
             return boardChanged;
+        }
+
+        private static void LogDeadlock(Action<string> log, Cell[] cells, int members, ReadOnlySpan<int> candidates)
+        {
+            StringBuilder candidatesText = new();
+            foreach (int candidate in candidates)
+            {
+                if (candidatesText.Length > 0) candidatesText.Append(", ");
+                candidatesText.Append(candidate);
+            }
+            StringBuilder cellsText = new();
+            for (int k = 0; k < cells.Length; k++)
+            {
+                if ((members & (1 << k)) == 0) continue;
+                if (cellsText.Length > 0) cellsText.Append(", ");
+                cellsText.Append(cells[k].Index);
+            }
+            log($"Found deadlock: Cells #({cellsText}) locks values {candidatesText}");
         }
 
         public bool IsUnsolved()

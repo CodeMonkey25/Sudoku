@@ -76,7 +76,7 @@ namespace Sudoku
             Log(string.Empty);
         }
 
-        private bool SolveLogically(Board board, out string error, Dictionary<uint, List<Cell>> buffer)
+        private bool SolveLogically(Board board, out string error)
         {
             error = string.Empty;
             Action<string> logAction = _log ?? (_ => { });
@@ -101,7 +101,7 @@ namespace Sudoku
                 if (!string.IsNullOrEmpty(error)) return false;
                 
                 // check for deadlocks
-                if (board.CheckForDeadlockedCells(logAction, out error, buffer)) printUpdate = boardChanged = true;
+                if (board.CheckForDeadlockedCells(logAction, out error)) printUpdate = boardChanged = true;
                 if (!string.IsNullOrEmpty(error)) return false;
             }
 
@@ -113,13 +113,12 @@ namespace Sudoku
             return board.IsSolved();
         }
 
-        private bool SolveRecursively(Board board, ref int guesses, out string error, Dictionary<uint, List<Cell>>? bufferMap = null)
+        private bool SolveRecursively(Board board, ref int guesses, out string error)
         {
             error = string.Empty;
-            bufferMap ??= new Dictionary<uint, List<Cell>>();
             
             // try to solve the puzzle logically
-            if (SolveLogically(board, out error, bufferMap)) return true;
+            if (SolveLogically(board, out error)) return true;
             if (!string.IsNullOrEmpty(error)) return false;
 
             // try to guess the solution by checking candidates
@@ -134,7 +133,7 @@ namespace Sudoku
                 cell.Solve(value, out error);
                 if (string.IsNullOrEmpty(error))
                 {
-                    if (SolveRecursively(board, ref guesses, out error, bufferMap))
+                    if (SolveRecursively(board, ref guesses, out error))
                     {
                         if (string.IsNullOrEmpty(error)) return true;
                     }
@@ -157,11 +156,10 @@ namespace Sudoku
             error = string.Empty;
             
             Stack<LoopState> loopStates = new(board.Cells.Length);
-            Dictionary<uint, List<Cell>> buffer = new();
             bool suppressLogicalSolve = false;
             do
             {
-                if (!suppressLogicalSolve && SolveLogically(board, out error, buffer)) return;
+                if (!suppressLogicalSolve && SolveLogically(board, out error)) return;
                 suppressLogicalSolve = false;
                 
                 LoopState loopState;
