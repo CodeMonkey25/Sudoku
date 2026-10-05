@@ -147,8 +147,10 @@ namespace Sudoku
                 guesses--;
             }
             
+            if (board.IsSolved()) return true;
+            
             error = "No valid candidate branch led to a solution.";
-            return board.IsSolved();
+            return false;
         }
         
         private void SolveIteratively(Board board, ref int guesses, out string error)
