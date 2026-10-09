@@ -365,28 +365,28 @@ public class BoardTests
 
     #endregion
 
-    #region GetOriginalPuzzle / GetSolution
+    #region GetPuzzle / GetSolution
 
     [Fact]
-    public void GetOriginalPuzzle_EmptyBoard_ReturnsOnlyCommas()
+    public void GetPuzzle_EmptyBoard_ReturnsOnlyCommas()
     {
         using Board board = new();
 
-        Assert.Equal(new string(',', 80), board.GetOriginalPuzzle());
+        Assert.Equal(new string(',', 80), board.GetPuzzle());
     }
 
     [Fact]
-    public void GetOriginalPuzzle_RoundTripsThroughParsePuzzle()
+    public void GetPuzzle_RoundTripsThroughParsePuzzle()
     {
         using Board board = LoadedBoard(Puzzles.L1N001);
 
-        int[] reparsed = Board.ParsePuzzle(board.GetOriginalPuzzle());
+        int[] reparsed = Board.ParsePuzzle(board.GetPuzzle());
 
         Assert.Equal(board.GetSolution(), reparsed);
     }
 
     [Fact]
-    public void GetOriginalPuzzle_FormatsSolvedValues()
+    public void GetPuzzle_FormatsSolvedValues()
     {
         int[] puzzle = new int[81];
         puzzle[0] = 3;
@@ -394,7 +394,7 @@ public class BoardTests
         using Board board = new();
         board.LoadPuzzle(puzzle, out _);
 
-        Assert.Equal("3" + new string(',', 80) + "7", board.GetOriginalPuzzle());
+        Assert.Equal("3" + new string(',', 80) + "7", board.GetPuzzle());
     }
 
     [Fact]

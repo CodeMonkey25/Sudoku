@@ -88,7 +88,7 @@ namespace Sudoku
             }
         }
 
-        public string GetOriginalPuzzle() => string.Join(",", Cells.Select(static cell => cell.Value == 0 ? string.Empty : cell.Value.ToString()));
+        public string GetPuzzle() => string.Join(",", Cells.Select(static cell => cell.Value == 0 ? string.Empty : cell.Value.ToString()));
 
         public int[] GetSolution() => Cells.Select(static cell => cell.Value).ToArray();
 

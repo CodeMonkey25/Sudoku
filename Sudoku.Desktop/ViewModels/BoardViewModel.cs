@@ -47,11 +47,8 @@ public class BoardViewModel : ViewModelBase
         IsDirty = true;
     }
 
-    public string GetPuzzle()
-    {
-        return Board.GetOriginalPuzzle();
-    }
-    
+    public string GetPuzzle() => Board.GetPuzzle();
+
     public void StoreCellViewModel(CellViewModel cellViewModel)
     {
         if (CellViewModels[cellViewModel.Cell.Index] is not null)
