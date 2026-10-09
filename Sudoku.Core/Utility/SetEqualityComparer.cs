@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sudoku;
+namespace Sudoku.Utility;
 
 public sealed class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> where T : notnull
 {
@@ -8,7 +8,7 @@ public sealed class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> where T 
 
     public bool Equals(ISet<T>? first, ISet<T>? second)
     {
-        if (ReferenceEquals(first, second)) return true;
+        if (object.ReferenceEquals(first, second)) return true;
         if (first is null) return false;
         if (second is null) return false;
         if (first.GetType() != second.GetType()) return false;
@@ -31,7 +31,7 @@ public sealed class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> where T 
             int hash = 17;
             foreach (T element in set)
             {
-                hash = hash * 31 + ElementComparer.GetHashCode(element);
+                hash = hash * 31 + SetEqualityComparer<T>.ElementComparer.GetHashCode(element);
             }
             return hash;
         }

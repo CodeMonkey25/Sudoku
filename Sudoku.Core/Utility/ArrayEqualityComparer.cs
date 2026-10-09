@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sudoku
+namespace Sudoku.Utility
 {
     // code heavily inspired by Jon Skeet - 08/30/2011
     // https://stackoverflow.com/a/7244729/2748023
@@ -16,7 +16,7 @@ namespace Sudoku
             
             for (int i = 0; i < first.Length; i++)
             {
-                if (!ElementComparer.Equals(first[i], second[i]))
+                if (!ArrayEqualityComparer<T>.ElementComparer.Equals(first[i], second[i]))
                 {
                     return false;
                 }
@@ -32,7 +32,7 @@ namespace Sudoku
                 int hash = 17;
                 foreach (T element in array)
                 {
-                    hash = hash * 31 + ElementComparer.GetHashCode(element);
+                    hash = hash * 31 + ArrayEqualityComparer<T>.ElementComparer.GetHashCode(element);
                 }
                 return hash;
             }
