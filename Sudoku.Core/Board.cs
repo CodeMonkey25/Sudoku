@@ -115,11 +115,23 @@ namespace Sudoku
 
             if (!string.IsNullOrEmpty(puzzle))
             {
-                if (puzzle.Contains(' '))
-                    loadedPuzzle = ParsePuzzleWithSpaces(puzzle);
-
                 if (puzzle.Contains(','))
+                {
                     loadedPuzzle = ParsePuzzleWithCommas(puzzle);
+                }
+                else if (puzzle.Contains(' '))
+                {
+                    loadedPuzzle = ParsePuzzleWithSpaces(puzzle);
+                }
+                else
+                {
+                    // digits only format (530070000...), tolerating surrounding whitespace such as a trailing new line
+                    string trimmed = puzzle.Trim();
+                    if (trimmed.Length == 81 && trimmed.All(char.IsDigit))
+                    {
+                        loadedPuzzle = trimmed.Select(c => c - '0').ToArray();
+                    }
+                }
             }
 
             if (loadedPuzzle.Length != 81)

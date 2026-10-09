@@ -75,8 +75,11 @@ namespace Sudoku
                 if (value != Value)
                 {
                     error = $"Cell {Index} is already solved with a different value: {Value} != {value}";
+                    return;
                 }
 
+                // a given may already be solved by propagation from earlier givens; never clear an existing given
+                IsGiven = IsGiven || isGiven;
                 return;
             }
 

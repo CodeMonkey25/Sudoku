@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sudoku.Utility;
 
 public sealed class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> where T : notnull
 {
-    private static readonly EqualityComparer<T> ElementComparer = EqualityComparer<T>.Default;
-
     public bool Equals(ISet<T>? first, ISet<T>? second)
     {
         if (object.ReferenceEquals(first, second)) return true;
@@ -26,14 +26,12 @@ public sealed class SetEqualityComparer<T> : IEqualityComparer<ISet<T>> where T 
     public int GetHashCode(ISet<T>? set)
     {
         if (set == null) return 0;
-        unchecked
+        
+        HashCode hashCode = new();
+        foreach (T item in set.Order())
         {
-            int hash = 17;
-            foreach (T element in set)
-            {
-                hash = hash * 31 + SetEqualityComparer<T>.ElementComparer.GetHashCode(element);
-            }
-            return hash;
+            hashCode.Add(item);
         }
+        return hashCode.ToHashCode();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Sudoku.Utility
@@ -27,15 +28,13 @@ namespace Sudoku.Utility
         public int GetHashCode(T[]? array)
         {
             if (array == null) return 0;
-            unchecked
+        
+            HashCode hashCode = new();
+            foreach (T item in array)
             {
-                int hash = 17;
-                foreach (T element in array)
-                {
-                    hash = hash * 31 + ArrayEqualityComparer<T>.ElementComparer.GetHashCode(element);
-                }
-                return hash;
+                hashCode.Add(item);
             }
+            return hashCode.ToHashCode();
         }
     }
 }
