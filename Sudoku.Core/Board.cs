@@ -108,12 +108,13 @@ namespace Sudoku
                 Cells[i].SetState(state[i]);
             }
         }
-
-        public static int[] ParsePuzzle(string puzzle)
+        
+        public static int[] ParsePuzzle(ReadOnlySpan<char> puzzle)
         {
             int[] loadedPuzzle = [];
 
-            if (!string.IsNullOrEmpty(puzzle))
+            puzzle = puzzle.Trim();
+            if (!puzzle.IsEmpty)
             {
                 if (puzzle.Contains(','))
                 {
@@ -123,14 +124,9 @@ namespace Sudoku
                 {
                     loadedPuzzle = ParsePuzzleWithSpaces(puzzle);
                 }
-                else
+                else if (puzzle.Length == 81 && puzzle.IndexOfAnyExceptInRange('0', '9') < 0)
                 {
-                    // digits only format (530070000...), tolerating surrounding whitespace such as a trailing new line
-                    string trimmed = puzzle.Trim();
-                    if (trimmed.Length == 81 && trimmed.All(char.IsDigit))
-                    {
-                        loadedPuzzle = trimmed.Select(c => c - '0').ToArray();
-                    }
+                    loadedPuzzle = ParsePuzzleWithDigits(puzzle);
                 }
             }
 
@@ -140,7 +136,7 @@ namespace Sudoku
             return loadedPuzzle;
         }
 
-        private static int[] ParsePuzzleWithCommas(string puzzle)
+        private static int[] ParsePuzzleWithCommas(ReadOnlySpan<char> puzzle)
         {
             // comma separated format (4,,,,9,,,8 ...)
 
@@ -175,14 +171,16 @@ namespace Sudoku
             return loadedPuzzle;
         }
 
-        private static int[] ParsePuzzleWithSpaces(string puzzle)
+        private static int[] ParsePuzzleWithSpaces(ReadOnlySpan<char> puzzle)
         {
             // alternate format (530 070 000 ...)
 
             int j = 0;
             int[] loadedPuzzle = new int[81];
-            foreach (char c in puzzle.Where(char.IsDigit))
+            foreach (char c in puzzle)
             {
+                if (!char.IsDigit(c)) continue;
+                
                 if (j >= loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
                 loadedPuzzle[j++] = c - '0';
             }
@@ -190,7 +188,20 @@ namespace Sudoku
             if (j != loadedPuzzle.Length) throw new Exception("Puzzle is malformed: cell count is not 81");
             return loadedPuzzle;
         }
-            
+        
+        private static int[] ParsePuzzleWithDigits(ReadOnlySpan<char> puzzle)
+        {
+            // alternate format (530070000...)
+            int[] loadedPuzzle = new int[81];
+            int i = 0;
+            foreach (char c in puzzle)
+            {
+                if (!char.IsDigit(c)) throw new Exception("Puzzle is malformed: cell contains non-digit character");
+                loadedPuzzle[i++] = c - '0';
+            }
+            return loadedPuzzle;
+        }
+        
         public void LoadPuzzle(int[] puzzle, out string error)
         {
             error = string.Empty;
