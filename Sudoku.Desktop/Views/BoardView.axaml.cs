@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Binding;
 using ReactiveUI.Primitives;
 using Splat;
 using Sudoku.ViewModels;

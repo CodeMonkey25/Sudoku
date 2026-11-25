@@ -16,16 +16,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
+        <PackageReference Include="Avalonia" Version="12.2.0" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.2.0" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.2.0" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.2.0" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
         <PackageReference Include="DynamicData" Version="9.5.0" />
-        <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.6" />
-        <PackageReference Include="ReactiveUI.SourceGenerators" Version="4.2.0" PrivateAssets="all" />
-        <PackageReference Include="Splat.DependencyInjection.SourceGenerator" Version="3.0.0">
+        <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.9" />
+        <PackageReference Include="ReactiveUI.SourceGenerators" Version="7.1.0" PrivateAssets="all" />
+        <PackageReference Include="Splat.DependencyInjection.SourceGenerator" Version="4.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
